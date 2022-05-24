@@ -1,8 +1,9 @@
+mod sign_with_keychain;
 pub mod sign_with_private_key;
 
 #[derive(clap::Subcommand, Debug, Clone)]
 pub enum SignWith {
-    SignWithKeychain,
+    SignWithKeychain(sign_with_keychain::SignKeychain),
     SignWithLedger,
     SignWithPlaintextPrivateKey(sign_with_private_key::SignPrivateKey),
 }
