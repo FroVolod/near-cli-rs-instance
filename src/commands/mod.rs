@@ -78,22 +78,52 @@ impl<Next: clap::Subcommand + std::fmt::Debug> Network<Next> {
             // crate::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(
             //     sign_private_key,
             // ) => sign_private_key.process().await,
-            _ => crate::transaction_signature_options::SignWith::process(
-                &crate::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(
-                    crate::transaction_signature_options::sign_with_private_key::SignPrivateKey {
-                        signer_public_key: "ed25519:EAvya9ABXCaPv8rU1rnxd9xThXN6guAFVVBuvaXNWg8G"  // owner_account_id: volodymyr.testnet
-                            .parse()?,
-                        signer_private_key: "ed25519:2n9y3EZZUf4y9HZmkRZTmRHJ1ihKfPSbeBgUUCREqkcmwvJh1xXwgHaw4r1fs4hCLNNwC6ZN43hv83rDVyCP1h84"
-                            .parse()?,
-                        nonce: None,
-                        block_hash: None,
-                        submit: crate::transaction_signature_options::Submit::Send,
-                    },
-                ),
-                prepopulated_unsigned_transaction,
-                connection_config
-            )
-            .await,
+
+            // _ => crate::transaction_signature_options::SignWith::process(
+            //     &crate::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(
+            //         crate::transaction_signature_options::sign_with_private_key::SignPrivateKey {
+            //             signer_public_key: "ed25519:EAvya9ABXCaPv8rU1rnxd9xThXN6guAFVVBuvaXNWg8G"  // owner_account_id: volodymyr.testnet
+            //                 .parse()?,
+            //             signer_private_key: "ed25519:2n9y3EZZUf4y9HZmkRZTmRHJ1ihKfPSbeBgUUCREqkcmwvJh1xXwgHaw4r1fs4hCLNNwC6ZN43hv83rDVyCP1h84"
+            //                 .parse()?,
+            //             nonce: None,
+            //             block_hash: None,
+            //             submit: crate::transaction_signature_options::Submit::Send,
+            //         },
+            //     ),
+            //     prepopulated_unsigned_transaction,
+            //         connection_config,
+            //     )
+            //     .await
+            _ => {
+                crate::transaction_signature_options::SignWith::process(
+                    &crate::transaction_signature_options::SignWith::SignWithKeychain(
+                        crate::transaction_signature_options::sign_with_keychain::SignKeychain {
+                            nonce: None,
+                            block_hash: None,
+                            submit: crate::transaction_signature_options::Submit::Send,
+                        },
+                    ),
+                    prepopulated_unsigned_transaction,
+                    connection_config,
+                )
+                .await
+            } // _ => {
+              //     crate::transaction_signature_options::SignWith::process(
+              //         &crate::transaction_signature_options::SignWith::SignWithLedger(
+              //             crate::transaction_signature_options::sign_with_ledger::SignLedger {
+              //                 seed_phrase_hd_path: None,
+              //                 signer_public_key: None,
+              //                 nonce: None,
+              //                 block_hash: None,
+              //                 submit: crate::transaction_signature_options::Submit::Send,
+              //             },
+              //         ),
+              //         prepopulated_unsigned_transaction,
+              //         connection_config,
+              //     )
+              //     .await
+              // }
         }
     }
 }

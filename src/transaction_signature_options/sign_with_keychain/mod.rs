@@ -4,8 +4,8 @@ use serde::Deserialize;
 
 #[derive(clap::Args, Debug, Clone)]
 pub struct SignKeychain {
-    nonce: Option<u64>,
-    block_hash: Option<String>,
+    pub nonce: Option<u64>,
+    pub block_hash: Option<String>,
     #[clap(subcommand)]
     pub submit: super::Submit,
 }
@@ -19,7 +19,7 @@ struct User {
 
 impl SignKeychain {
     pub async fn process(
-        self,
+        &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         network_connection_config: crate::common::ConnectionConfig,
     ) -> crate::CliResult {

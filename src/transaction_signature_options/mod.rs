@@ -1,10 +1,11 @@
-mod sign_with_keychain;
+pub mod sign_with_keychain;
+pub mod sign_with_ledger;
 pub mod sign_with_private_key;
 
 #[derive(clap::Subcommand, Debug, Clone)]
 pub enum SignWith {
     SignWithKeychain(sign_with_keychain::SignKeychain),
-    SignWithLedger,
+    SignWithLedger(sign_with_ledger::SignLedger),
     SignWithPlaintextPrivateKey(sign_with_private_key::SignPrivateKey),
 }
 
@@ -15,12 +16,21 @@ impl SignWith {
         connection_config: crate::common::ConnectionConfig,
     ) -> crate::CliResult {
         match self {
+            Self::SignWithKeychain(sign_keychain) => {
+                sign_keychain
+                    .process(prepopulated_unsigned_transaction, connection_config)
+                    .await
+            }
             Self::SignWithPlaintextPrivateKey(sign_private_key) => {
                 sign_private_key
                     .process(prepopulated_unsigned_transaction, connection_config)
                     .await
             }
-            _ => todo!(),
+            Self::SignWithLedger(sign_ledger) => {
+                sign_ledger
+                    .process(prepopulated_unsigned_transaction, connection_config)
+                    .await
+            }
         }
     }
 }
