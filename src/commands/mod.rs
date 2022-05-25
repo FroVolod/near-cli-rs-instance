@@ -95,10 +95,26 @@ impl<Next: clap::Subcommand + std::fmt::Debug> Network<Next> {
             //         connection_config,
             //     )
             //     .await
+            // _ => {
+            //     crate::transaction_signature_options::SignWith::process(
+            //         &crate::transaction_signature_options::SignWith::SignWithKeychain(
+            //             crate::transaction_signature_options::sign_with_keychain::SignKeychain {
+            //                 nonce: None,
+            //                 block_hash: None,
+            //                 submit: crate::transaction_signature_options::Submit::Send,
+            //             },
+            //         ),
+            //         prepopulated_unsigned_transaction,
+            //         connection_config,
+            //     )
+            //     .await
+            // }
             _ => {
                 crate::transaction_signature_options::SignWith::process(
-                    &crate::transaction_signature_options::SignWith::SignWithKeychain(
-                        crate::transaction_signature_options::sign_with_keychain::SignKeychain {
+                    &crate::transaction_signature_options::SignWith::SignWithLedger(
+                        crate::transaction_signature_options::sign_with_ledger::SignLedger {
+                            seed_phrase_hd_path: None,
+                            signer_public_key: None,
                             nonce: None,
                             block_hash: None,
                             submit: crate::transaction_signature_options::Submit::Send,
@@ -108,22 +124,7 @@ impl<Next: clap::Subcommand + std::fmt::Debug> Network<Next> {
                     connection_config,
                 )
                 .await
-            } // _ => {
-              //     crate::transaction_signature_options::SignWith::process(
-              //         &crate::transaction_signature_options::SignWith::SignWithLedger(
-              //             crate::transaction_signature_options::sign_with_ledger::SignLedger {
-              //                 seed_phrase_hd_path: None,
-              //                 signer_public_key: None,
-              //                 nonce: None,
-              //                 block_hash: None,
-              //                 submit: crate::transaction_signature_options::Submit::Send,
-              //             },
-              //         ),
-              //         prepopulated_unsigned_transaction,
-              //         connection_config,
-              //     )
-              //     .await
-              // }
+            }
         }
     }
 }
