@@ -1,9 +1,11 @@
+use near_primitives::views::ViewApplyState;
+
 mod tokens;
 
 #[derive(clap::Subcommand, Debug, Clone)]
 pub enum TopLevel {
-    Account(Account),
-    Contract(Contract),
+    Account(AccountCommands),
+    Contract(ContractCommands),
     Tokens(tokens::TokensCommands),
 }
 
@@ -19,31 +21,41 @@ impl TopLevel {
         };
         match self {
             Self::Tokens(tokens_commands) => tokens_commands.process(unsigned_transaction).await,
+            Self::Account(account_commands) => account_commands.process().await,
             _ => todo!(),
         }
     }
 }
 
 #[derive(clap::Args, Debug, Clone)]
-struct Account {
+pub struct AccountCommands {
     account_id: String,
     #[clap(subcommand)]
-    network: NetworkArg<ViewAtBlock>,
+    network: Network<ViewAtBlock>,
+}
+
+impl AccountCommands {
+    pub async fn process(
+        &self,
+    ) -> crate::CliResult {
+        // TODO: use account_id
+        self.network.process().await
+    }
 }
 
 #[derive(clap::Args, Debug, Clone)]
-struct Contract {
+pub struct ContractCommands {
     contract_id: String,
     #[clap(subcommand)]
-    network: NetworkArg<crate::transaction_signature_options::SignWith>,
+    network: Network<crate::transaction_signature_options::SignWith>,
 }
 
 #[derive(clap::Subcommand, Debug, Clone)]
-enum NetworkArg<Next: clap::Subcommand> {
-    Network(Network<Next>),
+enum Network<Next: clap::Subcommand> {
+    Network(NetworkArgs<Next>),
 }
 
-impl<Next: clap::Subcommand + std::fmt::Debug> NetworkArg<Next> {
+impl Network<crate::transaction_signature_options::SignWith> {
     pub async fn process(
         &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
@@ -54,14 +66,24 @@ impl<Next: clap::Subcommand + std::fmt::Debug> NetworkArg<Next> {
     }
 }
 
+impl Network<ViewAtBlock> {
+    pub async fn process(
+        &self,
+    ) -> crate::CliResult {
+        match self {
+            Self::Network(network) => network.process().await,
+        }
+    }
+}
+
 #[derive(clap::Args, Debug, Clone)]
-struct Network<Next: clap::Subcommand> {
+struct NetworkArgs<Next: clap::Subcommand> {
     network_name: String,
     #[clap(subcommand)]
     next: Next,
 }
 
-impl<Next: clap::Subcommand + std::fmt::Debug> Network<Next> {
+impl NetworkArgs<crate::transaction_signature_options::SignWith> {
     async fn process(
         &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
@@ -73,59 +95,29 @@ impl<Next: clap::Subcommand + std::fmt::Debug> Network<Next> {
             _ => todo!(),
         };
 
-        println!("*****  self: {:#?}", self);
-        match &self.next {
-            // crate::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(
-            //     sign_private_key,
-            // ) => sign_private_key.process().await,
+        self.next.process(
+            prepopulated_unsigned_transaction,
+            connection_config,
+        )
+        .await
+    }
+}
 
-            // _ => crate::transaction_signature_options::SignWith::process(
-            //     &crate::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(
-            //         crate::transaction_signature_options::sign_with_private_key::SignPrivateKey {
-            //             signer_public_key: "ed25519:EAvya9ABXCaPv8rU1rnxd9xThXN6guAFVVBuvaXNWg8G"  // owner_account_id: volodymyr.testnet
-            //                 .parse()?,
-            //             signer_private_key: "ed25519:2n9y3EZZUf4y9HZmkRZTmRHJ1ihKfPSbeBgUUCREqkcmwvJh1xXwgHaw4r1fs4hCLNNwC6ZN43hv83rDVyCP1h84"
-            //                 .parse()?,
-            //             nonce: None,
-            //             block_hash: None,
-            //             submit: crate::transaction_signature_options::Submit::Send,
-            //         },
-            //     ),
-            //     prepopulated_unsigned_transaction,
-            //         connection_config,
-            //     )
-            //     .await
-            // _ => {
-            //     crate::transaction_signature_options::SignWith::process(
-            //         &crate::transaction_signature_options::SignWith::SignWithKeychain(
-            //             crate::transaction_signature_options::sign_with_keychain::SignKeychain {
-            //                 nonce: None,
-            //                 block_hash: None,
-            //                 submit: crate::transaction_signature_options::Submit::Send,
-            //             },
-            //         ),
-            //         prepopulated_unsigned_transaction,
-            //         connection_config,
-            //     )
-            //     .await
-            // }
-            _ => {
-                crate::transaction_signature_options::SignWith::process(
-                    &crate::transaction_signature_options::SignWith::SignWithLedger(
-                        crate::transaction_signature_options::sign_with_ledger::SignLedger {
-                            seed_phrase_hd_path: None,
-                            signer_public_key: None,
-                            nonce: None,
-                            block_hash: None,
-                            submit: crate::transaction_signature_options::Submit::Send,
-                        },
-                    ),
-                    prepopulated_unsigned_transaction,
-                    connection_config,
-                )
-                .await
-            }
-        }
+impl NetworkArgs<ViewAtBlock> {
+    async fn process(
+        &self,
+    ) -> crate::CliResult {
+        let connection_config: crate::common::ConnectionConfig = match self.network_name.as_str() {
+            "testnet" => crate::common::ConnectionConfig::Testnet,
+            "mainnet" => crate::common::ConnectionConfig::Mainnet,
+            "betanet" => crate::common::ConnectionConfig::Betanet,
+            _ => todo!(),
+        };
+
+        self.next.process(
+            connection_config,
+        )
+        .await
     }
 }
 
@@ -136,9 +128,9 @@ enum ViewAtBlock {
 }
 
 impl ViewAtBlock {
-    async fn process(&self) -> crate::CliResult {
+    async fn process(&self, connection_config: crate::common::ConnectionConfig) -> crate::CliResult {
         match self {
-            _ => todo!(),
+            _ => todo!("view at block process"),
         }
     }
 }

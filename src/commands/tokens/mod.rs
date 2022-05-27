@@ -49,7 +49,7 @@ struct SendNearCommand {
     receiver_account_id: near_primitives::types::AccountId,
     amount_in_near: crate::common::NearBalance,
     #[clap(subcommand)]
-    network: super::NetworkArg<crate::transaction_signature_options::SignWith>,
+    network: super::Network<crate::transaction_signature_options::SignWith>,
 }
 
 impl SendNearCommand {
