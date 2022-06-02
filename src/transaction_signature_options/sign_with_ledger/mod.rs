@@ -54,23 +54,22 @@ impl SignLedger {
             .unwrap_or_default();
         let submit = self.submit.clone();
 
-        let online_signer_access_key_response = near_jsonrpc_client::JsonRpcClient::connect(
-            &network_connection_config.rpc_url().as_str(),
-        )
-        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-            block_reference: near_primitives::types::Finality::Final.into(),
-            request: near_primitives::views::QueryRequest::ViewAccessKey {
-                account_id: prepopulated_unsigned_transaction.signer_id.clone(),
-                public_key: signer_public_key.clone(),
-            },
-        })
-        .await
-        .map_err(|err| {
-            color_eyre::Report::msg(format!(
-                "Failed to fetch public key information for nonce: {:?}",
-                err
-            ))
-        })?;
+        let online_signer_access_key_response =
+            near_jsonrpc_client::JsonRpcClient::connect(network_connection_config.rpc_url())
+                .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
+                    block_reference: near_primitives::types::Finality::Final.into(),
+                    request: near_primitives::views::QueryRequest::ViewAccessKey {
+                        account_id: prepopulated_unsigned_transaction.signer_id.clone(),
+                        public_key: signer_public_key.clone(),
+                    },
+                })
+                .await
+                .map_err(|err| {
+                    color_eyre::Report::msg(format!(
+                        "Failed to fetch public key information for nonce: {:?}",
+                        err
+                    ))
+                })?;
         let current_nonce =
             if let near_jsonrpc_primitives::types::query::QueryResponseKind::AccessKey(
                 online_signer_access_key,

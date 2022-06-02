@@ -20,23 +20,22 @@ impl SignPrivateKey {
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         network_connection_config: crate::common::ConnectionConfig,
     ) -> crate::CliResult {
-        let online_signer_access_key_response = near_jsonrpc_client::JsonRpcClient::connect(
-            &network_connection_config.rpc_url().as_str(),
-        )
-        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-            block_reference: near_primitives::types::Finality::Final.into(),
-            request: near_primitives::views::QueryRequest::ViewAccessKey {
-                account_id: prepopulated_unsigned_transaction.signer_id.clone(),
-                public_key: self.signer_public_key.clone(),
-            },
-        })
-        .await
-        .map_err(|err| {
-            color_eyre::Report::msg(format!(
-                "Failed to fetch public key information for nonce: {:?}",
-                err
-            ))
-        })?;
+        let online_signer_access_key_response =
+            near_jsonrpc_client::JsonRpcClient::connect(network_connection_config.rpc_url())
+                .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
+                    block_reference: near_primitives::types::Finality::Final.into(),
+                    request: near_primitives::views::QueryRequest::ViewAccessKey {
+                        account_id: prepopulated_unsigned_transaction.signer_id.clone(),
+                        public_key: self.signer_public_key.clone(),
+                    },
+                })
+                .await
+                .map_err(|err| {
+                    color_eyre::Report::msg(format!(
+                        "Failed to fetch public key information for nonce: {:?}",
+                        err
+                    ))
+                })?;
         let current_nonce =
             if let near_jsonrpc_primitives::types::query::QueryResponseKind::AccessKey(
                 online_signer_access_key,
