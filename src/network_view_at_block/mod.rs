@@ -1,25 +1,14 @@
-#[derive(clap::Subcommand, Debug, Clone)]
-pub enum NetworkViewAtBlock {
-    Network(NetworkViewAtBlockArgs),
-}
+use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
-impl NetworkViewAtBlock {
-    pub async fn process(&self, account_id: near_primitives::types::AccountId) -> crate::CliResult {
-        match self {
-            Self::Network(network) => network.process(account_id).await,
-        }
-    }
-}
-
-#[derive(clap::Args, Debug, Clone)]
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct NetworkViewAtBlockArgs {
     network_name: String,
-    #[clap(subcommand)]
-    next: NextViewAtBlock,
+    #[interactive_clap(subcommand)]
+    next: ViewAtBlock,
 }
 
 impl NetworkViewAtBlockArgs {
-    async fn process(&self, account_id: near_primitives::types::AccountId) -> crate::CliResult {
+    pub async fn process(&self, account_id: near_primitives::types::AccountId) -> crate::CliResult {
         let connection_config: crate::common::ConnectionConfig = match self.network_name.as_str() {
             "testnet" => crate::common::ConnectionConfig::Testnet,
             "mainnet" => crate::common::ConnectionConfig::Mainnet,
@@ -31,48 +20,15 @@ impl NetworkViewAtBlockArgs {
     }
 }
 
-#[derive(clap::Subcommand, Debug, Clone)]
-enum NextViewAtBlock {
-    ViewAtBlock(ViewAtBlockArgs),
-}
-
-impl NextViewAtBlock {
-    async fn process(
-        &self,
-        account_id: near_primitives::types::AccountId,
-        connection_config: crate::common::ConnectionConfig,
-    ) -> crate::CliResult {
-        match &self {
-            Self::ViewAtBlock(view_at_block_args) => {
-                view_at_block_args
-                    .process(account_id, connection_config)
-                    .await
-            }
-        }
-    }
-}
-
-#[derive(clap::Args, Debug, Clone)]
-struct ViewAtBlockArgs {
-    #[clap(subcommand)]
-    view_at_block: ViewAtBlock,
-}
-
-impl ViewAtBlockArgs {
-    async fn process(
-        &self,
-        account_id: near_primitives::types::AccountId,
-        connection_config: crate::common::ConnectionConfig,
-    ) -> crate::CliResult {
-        self.view_at_block
-            .process(account_id, connection_config)
-            .await
-    }
-}
-
-#[derive(clap::Subcommand, Debug, Clone)]
-enum ViewAtBlock {
+#[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
+#[strum_discriminants(derive(EnumMessage, EnumIter))]
+///Сhoose block for view
+pub enum ViewAtBlock {
+    #[strum_discriminants(strum(message = "View account properties in the final block"))]
+    /// View account properties in the final block
     Now,
+    #[strum_discriminants(strum(message = "View account properties in the selected block"))]
+    /// View account properties in the selected block
     AtBlockHeight(AtBlockHeight),
 }
 
@@ -103,7 +59,7 @@ impl ViewAtBlock {
     }
 }
 
-#[derive(clap::Args, Debug, Clone)]
-struct AtBlockHeight {
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+pub struct AtBlockHeight {
     block_height: u64,
 }

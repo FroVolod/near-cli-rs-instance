@@ -411,15 +411,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "clap_complete"
-version = "3.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da92e6facd8d73c22745a5d3cbb59bdf8e46e3235c923e516527d8e81eec14a4"
-dependencies = [
- "clap",
-]
-
-[[package]]
 name = "clap_derive"
 version = "3.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -430,16 +421,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "clap_generate"
-version = "3.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e1b28c4a802ac3628604fd267cac62aaea74dc61af3410db6b1c44c03b42599"
-dependencies = [
- "clap",
- "clap_complete",
 ]
 
 [[package]]
@@ -1189,16 +1170,15 @@ dependencies = [
 [[package]]
 name = "interactive_clap"
 version = "0.1.0"
-source = "git+https://github.com/FroVolod/interactive-clap?rev=23481402d7f36d9e7b0f5460f6d249bcf4c31ec5#23481402d7f36d9e7b0f5460f6d249bcf4c31ec5"
+dependencies = [
+ "interactive_clap_derive",
+ "near-ledger",
+]
 
 [[package]]
 name = "interactive_clap_derive"
 version = "0.1.0"
-source = "git+https://github.com/FroVolod/interactive-clap?rev=23481402d7f36d9e7b0f5460f6d249bcf4c31ec5#23481402d7f36d9e7b0f5460f6d249bcf4c31ec5"
 dependencies = [
- "clap",
- "clap_generate",
- "interactive_clap",
  "proc-macro-error",
  "proc-macro2",
  "quote",

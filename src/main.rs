@@ -1,6 +1,6 @@
 use clap::Parser;
-use common::CliResult;
-// use common::{try_external_subcommand_execution, CliResult};
+// use common::CliResult;
+use common::{try_external_subcommand_execution, CliResult};
 
 mod commands;
 mod common;
@@ -10,10 +10,10 @@ mod network_view_at_block;
 mod transaction_signature_options;
 mod types;
 
-#[derive(Parser, Debug, Clone)]
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 struct Cmd {
-    #[clap(subcommand)]
-    top_level: self::commands::TopLevel,
+    #[interactive_clap(subcommand)]
+    top_level: self::commands::TopLevelCommand,
 }
 
 impl Cmd {
@@ -23,18 +23,40 @@ impl Cmd {
 }
 
 fn main() -> CliResult {
-    let args = Cmd::parse();
-    println!("{:#?}", args);
+    color_eyre::install()?;
+
+    let cli = match Cmd::try_parse() {
+        Ok(cli) => cli,
+        Err(error) => {
+            if matches!(
+                error.kind(),
+                clap::error::ErrorKind::UnknownArgument | clap::error::ErrorKind::InvalidSubcommand
+            ) {
+                return try_external_subcommand_execution(error);
+            }
+            error.exit();
+        }
+    };
+
+    // if let Some(self::commands::CliTopLevelCommand::GenerateShellCompletions(subcommand)) =
+    //     cli.top_level_command
+    // {
+    //     subcommand.process();
+    //     return Ok(());
+    // }
+
+    let cmd = Cmd::from_cli(Some(cli), ())?;
+
+    let completed_cli = CliCmd::from(cmd.clone());
 
     let process_result = tokio::runtime::Runtime::new()
         .unwrap()
-        .block_on(args.process());
+        .block_on(cmd.process());
 
-    // println!(
-    //     "Your console command:\n{} {}",
-    //     std::env::args().next().as_deref().unwrap_or("./near_cli"),
-    //     shell_words::join(&completed_cli.to_cli_args())
-    // );
+    println!(
+        "Your console command:\n./near-cli {}",
+        shell_words::join(&completed_cli.to_cli_args())
+    );
 
     process_result
 }

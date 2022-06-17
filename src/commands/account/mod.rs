@@ -1,8 +1,9 @@
 mod view_account_summary;
+use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
-#[derive(clap::Args, Debug, Clone)]
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct AccountCommands {
-    #[clap(subcommand)]
+    #[interactive_clap(subcommand)]
     account_actions: AccountActions,
 }
 
@@ -12,8 +13,12 @@ impl AccountCommands {
     }
 }
 
-#[derive(clap::Subcommand, Debug, Clone)]
-enum AccountActions {
+#[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
+#[strum_discriminants(derive(EnumMessage, EnumIter))]
+///Сhoose action for account
+pub enum AccountActions {
+    #[strum_discriminants(strum(message = "View properties for an account"))]
+    /// View properties for an account
     ViewAccountSummary(self::view_account_summary::ViewAccountSummary),
     CreateSubaccount,
     DeleteAccount,

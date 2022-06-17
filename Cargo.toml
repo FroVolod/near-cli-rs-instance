@@ -45,8 +45,11 @@ near-primitives = "0.14"
 near-jsonrpc-client = "0.4.0-beta.0"
 near-jsonrpc-primitives = "0.14"
 
-interactive_clap = { git = "https://github.com/FroVolod/interactive-clap", rev="23481402d7f36d9e7b0f5460f6d249bcf4c31ec5" }
-interactive_clap_derive = { git = "https://github.com/FroVolod/interactive-clap", rev="23481402d7f36d9e7b0f5460f6d249bcf4c31ec5" }
+# interactive_clap = { git = "https://github.com/FroVolod/interactive-clap", rev="23481402d7f36d9e7b0f5460f6d249bcf4c31ec5" }
+# interactive_clap_derive = { git = "https://github.com/FroVolod/interactive-clap", rev="23481402d7f36d9e7b0f5460f6d249bcf4c31ec5" }
+interactive_clap = { path = "/Users/frovolod/Documents2/Rust/hello-macro/macro-proba/interactive_clap" }
+interactive_clap_derive = { path = "/Users/frovolod/Documents2/Rust/hello-macro/macro-proba/interactive_clap/interactive_clap_derive" }
+
 
 [features]
 default = ["ledger"]

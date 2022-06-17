@@ -514,7 +514,7 @@ pub fn get_account_transfer_allowance(
         };
     let storage_amount_per_byte = tokio::runtime::Runtime::new().unwrap()
         .block_on(async {
-            near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url().as_str())
+            near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url())
                 .call(
                     near_jsonrpc_client::methods::EXPERIMENTAL_protocol_config::RpcProtocolConfigRequest {
                         block_reference: near_primitives::types::BlockReference::Finality(
@@ -547,7 +547,7 @@ pub fn get_account_state(
     account_id: near_primitives::types::AccountId,
 ) -> color_eyre::eyre::Result<Option<near_primitives::views::AccountView>> {
     let query_view_method_response = tokio::runtime::Runtime::new().unwrap().block_on(async {
-        near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url().as_str())
+        near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url())
             .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
                 block_reference: near_primitives::types::Finality::Final.into(),
                 request: near_primitives::views::QueryRequest::ViewAccount { account_id },
@@ -1203,51 +1203,51 @@ pub async fn save_access_key_to_keychain(
     Ok(())
 }
 
-// pub fn try_external_subcommand_execution(error: clap::Error) -> CliResult {
-//     let (subcommand, args) = {
-//         let mut args = std::env::args().skip(1);
-//         let subcommand = args
-//             .next()
-//             .ok_or_else(|| color_eyre::eyre::eyre!("subcommand is not provided"))?;
-//         (subcommand, args.collect::<Vec<String>>())
-//     };
-//     let is_top_level_command_known = crate::commands::TopLevelCommandDiscriminants::iter()
-//         .map(|x| format!("{:?}", &x).to_lowercase())
-//         .find(|x| x == &subcommand)
-//         .is_some();
-//     if is_top_level_command_known {
-//         error.exit()
-//     }
-//     let subcommand_exe = format!("near-cli-{}{}", subcommand, std::env::consts::EXE_SUFFIX);
+pub fn try_external_subcommand_execution(error: clap::Error) -> CliResult {
+    let (subcommand, args) = {
+        let mut args = std::env::args().skip(1);
+        let subcommand = args
+            .next()
+            .ok_or_else(|| color_eyre::eyre::eyre!("subcommand is not provided"))?;
+        (subcommand, args.collect::<Vec<String>>())
+    };
+    let is_top_level_command_known = crate::commands::TopLevelCommandDiscriminants::iter()
+        .map(|x| format!("{:?}", &x).to_lowercase())
+        .find(|x| x == &subcommand)
+        .is_some();
+    if is_top_level_command_known {
+        error.exit()
+    }
+    let subcommand_exe = format!("near-cli-{}{}", subcommand, std::env::consts::EXE_SUFFIX);
 
-//     let path = path_directories()
-//         .iter()
-//         .map(|dir| dir.join(&subcommand_exe))
-//         .find(|file| is_executable(file));
+    let path = path_directories()
+        .iter()
+        .map(|dir| dir.join(&subcommand_exe))
+        .find(|file| is_executable(file));
 
-//     let command = path.ok_or_else(|| {
-//         color_eyre::eyre::eyre!(
-//             "{} command or {} extension does not exist",
-//             subcommand,
-//             subcommand_exe
-//         )
-//     })?;
+    let command = path.ok_or_else(|| {
+        color_eyre::eyre::eyre!(
+            "{} command or {} extension does not exist",
+            subcommand,
+            subcommand_exe
+        )
+    })?;
 
-//     let err = match cargo_util::ProcessBuilder::new(&command)
-//         .args(&args)
-//         .exec_replace()
-//     {
-//         Ok(()) => return Ok(()),
-//         Err(e) => e,
-//     };
+    let err = match cargo_util::ProcessBuilder::new(&command)
+        .args(&args)
+        .exec_replace()
+    {
+        Ok(()) => return Ok(()),
+        Err(e) => e,
+    };
 
-//     if let Some(perr) = err.downcast_ref::<cargo_util::ProcessError>() {
-//         if let Some(code) = perr.code {
-//             return Err(color_eyre::eyre::eyre!("perror occurred, code: {}", code));
-//         }
-//     }
-//     return Err(color_eyre::eyre::eyre!(err));
-// }
+    if let Some(perr) = err.downcast_ref::<cargo_util::ProcessError>() {
+        if let Some(code) = perr.code {
+            return Err(color_eyre::eyre::eyre!("perror occurred, code: {}", code));
+        }
+    }
+    return Err(color_eyre::eyre::eyre!(err));
+}
 
 fn is_executable<P: AsRef<std::path::Path>>(path: P) -> bool {
     #[cfg(target_family = "unix")]
