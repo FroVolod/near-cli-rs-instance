@@ -2,11 +2,29 @@ pub mod sign_with_keychain;
 pub mod sign_with_ledger;
 pub mod sign_with_private_key;
 
+#[derive(clap::Args, Debug, Clone)]
+pub struct SignWithArgs {
+    #[clap(subcommand)]
+    sign_with: SignWith,
+}
+
+impl SignWithArgs {
+    pub async fn process(
+        &self,
+        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
+        connection_config: crate::common::ConnectionConfig,
+    ) -> crate::CliResult {
+        self.sign_with
+            .process(prepopulated_unsigned_transaction, connection_config)
+            .await
+    }
+}
+
 #[derive(clap::Subcommand, Debug, Clone)]
 pub enum SignWith {
-    SignWithKeychain(sign_with_keychain::SignKeychain),
-    SignWithLedger(sign_with_ledger::SignLedger),
-    SignWithPlaintextPrivateKey(sign_with_private_key::SignPrivateKey),
+    SignWithKeychain(self::sign_with_keychain::SignKeychain),
+    SignWithLedger(self::sign_with_ledger::SignLedger),
+    SignWithPlaintextPrivateKey(self::sign_with_private_key::SignPrivateKey),
 }
 
 impl SignWith {
