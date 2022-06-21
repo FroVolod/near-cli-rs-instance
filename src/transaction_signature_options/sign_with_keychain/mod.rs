@@ -2,11 +2,18 @@ extern crate dirs;
 
 use serde::Deserialize;
 
-#[derive(clap::Args, Debug, Clone)]
+#[derive(Debug, Clone, interactive_clap_derive::InteractiveClap)]
+#[interactive_clap(skip_default_from_cli)]
 pub struct SignKeychain {
-    pub nonce: Option<u64>,
+    #[interactive_clap(long)]
+    #[interactive_clap(skip_default_from_cli_arg)]
+    #[interactive_clap(skip_default_input_arg)]
+    nonce: Option<u64>,
+    #[interactive_clap(long)]
+    #[interactive_clap(skip_default_from_cli_arg)]
+    #[interactive_clap(skip_default_input_arg)]
     pub block_hash: Option<String>,
-    #[clap(subcommand)]
+    #[interactive_clap(subcommand)]
     pub submit: super::Submit,
 }
 
@@ -15,6 +22,26 @@ struct User {
     account_id: near_primitives::types::AccountId,
     public_key: near_crypto::PublicKey,
     private_key: near_crypto::SecretKey,
+}
+
+impl SignKeychain {
+    pub fn from_cli(
+        optional_clap_variant: Option<<SignKeychain as interactive_clap::ToCli>::CliVariant>,
+        context: (),
+    ) -> color_eyre::eyre::Result<Self> {
+        let submit: super::Submit = match optional_clap_variant
+            .clone()
+            .and_then(|clap_variant| clap_variant.submit)
+        {
+            Some(submit) => submit,
+            None => super::Submit::choose_submit(),
+        };
+        Ok(Self {
+            nonce: None,
+            block_hash: None,
+            submit,
+        })
+    }
 }
 
 impl SignKeychain {
@@ -109,8 +136,8 @@ impl SignKeychain {
         let account_json: User = serde_json::from_str(&data)
             .map_err(|err| color_eyre::Report::msg(format!("Error reading data: {}", err)))?;
         let sign_with_private_key = super::sign_with_private_key::SignPrivateKey {
-            signer_public_key: account_json.public_key,
-            signer_private_key: account_json.private_key,
+            signer_public_key: crate::types::public_key::PublicKey(account_json.public_key),
+            signer_private_key: crate::types::secret_key::SecretKey(account_json.private_key),
             nonce: self.nonce.clone(),
             block_hash: self.block_hash.clone(),
             submit: self.submit.clone(),

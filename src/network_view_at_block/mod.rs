@@ -2,6 +2,7 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct NetworkViewAtBlockArgs {
+    ///What is the name of the network
     network_name: String,
     #[interactive_clap(subcommand)]
     next: ViewAtBlock,

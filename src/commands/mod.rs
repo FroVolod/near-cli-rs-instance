@@ -12,22 +12,23 @@ pub enum TopLevelCommand {
     ))]
     ///View account summary, create subaccount, delete account, list keys, add key, delete key
     Account(self::account::AccountCommands),
-    // Contract(ContractCommands),
-    // Tokens(self::tokens::TokensCommands),
+    #[strum_discriminants(strum(message = "Use this for token actions"))]
+    ///Use this for token actions
+    Tokens(self::tokens::TokensCommands),
 }
 
 impl TopLevelCommand {
     pub async fn process(&self) -> crate::CliResult {
-        // let unsigned_transaction = near_primitives::transaction::Transaction {
-        //     signer_id: "test".parse().unwrap(),
-        //     public_key: near_crypto::PublicKey::empty(near_crypto::KeyType::ED25519),
-        //     nonce: 0,
-        //     receiver_id: "test".parse().unwrap(),
-        //     block_hash: Default::default(),
-        //     actions: vec![],
-        // };
+        let unsigned_transaction = near_primitives::transaction::Transaction {
+            signer_id: "test".parse().unwrap(),
+            public_key: near_crypto::PublicKey::empty(near_crypto::KeyType::ED25519),
+            nonce: 0,
+            receiver_id: "test".parse().unwrap(),
+            block_hash: Default::default(),
+            actions: vec![],
+        };
         match self {
-            // Self::Tokens(tokens_commands) => tokens_commands.process(unsigned_transaction).await,
+            Self::Tokens(tokens_commands) => tokens_commands.process(unsigned_transaction).await,
             Self::Account(account_commands) => account_commands.process().await,
             _ => todo!(),
         }

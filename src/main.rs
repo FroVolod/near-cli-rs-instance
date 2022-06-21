@@ -1,5 +1,3 @@
-use clap::Parser;
-// use common::CliResult;
 use common::{try_external_subcommand_execution, CliResult};
 
 mod commands;

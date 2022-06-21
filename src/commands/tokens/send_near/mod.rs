@@ -1,9 +1,12 @@
-#[derive(clap::Args, Debug, Clone)]
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct SendNearCommand {
-    receiver_account_id: near_primitives::types::AccountId,
+    ///What is the receiver account ID?
+    receiver_account_id: crate::types::account_id::AccountId,
+    ///Enter an amount to transfer
     amount_in_near: crate::common::NearBalance,
-    #[clap(subcommand)]
-    network: super::super::super::network_for_transaction::NetworkForTransaction,
+    #[interactive_clap(named_arg)]
+    ///Select online mode
+    network: super::super::super::network_for_transaction::NetworkForTransactionArgs,
 }
 
 impl SendNearCommand {
@@ -20,7 +23,7 @@ impl SendNearCommand {
         actions.push(action);
         let unsigned_transaction = near_primitives::transaction::Transaction {
             actions,
-            receiver_id: self.receiver_account_id.clone(),
+            receiver_id: self.receiver_account_id.clone().into(),
             ..prepopulated_unsigned_transaction
         };
         self.network.process(unsigned_transaction).await

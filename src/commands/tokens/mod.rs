@@ -1,9 +1,11 @@
 mod send_near;
+use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
-#[derive(clap::Args, Debug, Clone)]
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct TokensCommands {
-    owner_account_id: near_primitives::types::AccountId,
-    #[clap(subcommand)]
+    ///What is your account ID?
+    owner_account_id: crate::types::account_id::AccountId,
+    #[interactive_clap(subcommand)]
     tokens_actions: TokensActions,
 }
 
@@ -13,15 +15,19 @@ impl TokensCommands {
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         let unsigned_transaction = near_primitives::transaction::Transaction {
-            signer_id: self.owner_account_id.clone(),
+            signer_id: self.owner_account_id.clone().into(),
             ..prepopulated_unsigned_transaction
         };
         self.tokens_actions.process(unsigned_transaction).await
     }
 }
 
-#[derive(clap::Subcommand, Debug, Clone)]
-enum TokensActions {
+#[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
+#[strum_discriminants(derive(EnumMessage, EnumIter))]
+///Select actions with tokens
+pub enum TokensActions {
+    #[strum_discriminants(strum(message = "The transfer is carried out in NEAR tokens"))]
+    ///The transfer is carried out in NEAR tokens
     SendNear(self::send_near::SendNearCommand),
     SendFt,
     SendNft,
