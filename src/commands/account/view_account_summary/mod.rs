@@ -9,6 +9,9 @@ pub struct ViewAccountSummary {
 
 impl ViewAccountSummary {
     pub async fn process(&self) -> crate::CliResult {
-        self.network.process(self.account_id.clone().into()).await
+        let view_item = crate::common::ViewItems::ViewAccountSummary;
+        self.network
+            .process(self.account_id.clone().into(), view_item)
+            .await
     }
 }

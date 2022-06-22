@@ -1,5 +1,7 @@
-mod send_near;
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
+
+mod send_near;
+mod view_near_balance;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct TokensCommands {
@@ -31,7 +33,9 @@ pub enum TokensActions {
     SendNear(self::send_near::SendNearCommand),
     SendFt,
     SendNft,
-    ViewNearBalance,
+    #[strum_discriminants(strum(message = "View the balance of Near tokens"))]
+    ///View the balance of Near tokens
+    ViewNearBalance(self::view_near_balance::ViewNearBalance),
     ViewFtBalance,
     ViewNftBalance,
 }
@@ -45,6 +49,11 @@ impl TokensActions {
             Self::SendNear(send_near_command) => {
                 send_near_command
                     .process(prepopulated_unsigned_transaction)
+                    .await
+            }
+            Self::ViewNearBalance(view_near_balance) => {
+                view_near_balance
+                    .process(prepopulated_unsigned_transaction.signer_id)
                     .await
             }
             _ => todo!(),

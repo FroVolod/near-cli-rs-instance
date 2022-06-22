@@ -38,6 +38,21 @@ where
 }
 
 #[derive(Debug, Clone)]
+pub enum ViewItems {
+    ViewAccountSummary,
+    ViewAccessKeyList,
+    ViewNonce,
+    ViewCallFunction,
+    ViewContractHash,
+    ViewContractCode,
+    ViewContractState,
+    ViewTransactionStatus,
+    ViewNearBalance,
+    ViewFtBalance,
+    ViewNftBalance,
+}
+
+#[derive(Debug, Clone)]
 pub struct SignerContext {
     pub connection_config: Option<ConnectionConfig>,
     pub signer_account_id: crate::types::account_id::AccountId,
@@ -496,37 +511,37 @@ impl AccountTransferAllowance {
     }
 }
 
-pub fn get_account_transfer_allowance(
+pub async fn get_account_transfer_allowance(
     connection_config: &ConnectionConfig,
     account_id: near_primitives::types::AccountId,
 ) -> color_eyre::eyre::Result<AccountTransferAllowance> {
-    let account_view =
-        if let Some(account_view) = get_account_state(connection_config, account_id.clone())? {
-            account_view
-        } else {
-            return Ok(AccountTransferAllowance {
-                account_id,
-                account_liquid_balance: NearBalance::from_yoctonear(0),
-                account_locked_balance: NearBalance::from_yoctonear(0),
-                storage_stake: NearBalance::from_yoctonear(0),
-                pessimistic_transaction_fee: NearBalance::from_yoctonear(0),
-            });
-        };
-    let storage_amount_per_byte = tokio::runtime::Runtime::new().unwrap()
-        .block_on(async {
-            near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url())
-                .call(
-                    near_jsonrpc_client::methods::EXPERIMENTAL_protocol_config::RpcProtocolConfigRequest {
-                        block_reference: near_primitives::types::BlockReference::Finality(
-                            near_primitives::types::Finality::Final,
-                        ),
-                    },
-                )
-                .await
-        })
-        .map_err(|err| color_eyre::Report::msg(format!("RpcError: {:?}", err)))?
-        .runtime_config
-        .storage_amount_per_byte;
+    let account_view = if let Some(account_view) =
+        get_account_state(connection_config, account_id.clone()).await?
+    {
+        account_view
+    } else {
+        return Ok(AccountTransferAllowance {
+            account_id,
+            account_liquid_balance: NearBalance::from_yoctonear(0),
+            account_locked_balance: NearBalance::from_yoctonear(0),
+            storage_stake: NearBalance::from_yoctonear(0),
+            pessimistic_transaction_fee: NearBalance::from_yoctonear(0),
+        });
+    };
+    let storage_amount_per_byte = near_jsonrpc_client::JsonRpcClient::connect(
+        connection_config.rpc_url(),
+    )
+    .call(
+        near_jsonrpc_client::methods::EXPERIMENTAL_protocol_config::RpcProtocolConfigRequest {
+            block_reference: near_primitives::types::BlockReference::Finality(
+                near_primitives::types::Finality::Final,
+            ),
+        },
+    )
+    .await
+    .map_err(|err| color_eyre::Report::msg(format!("RpcError: {:?}", err)))?
+    .runtime_config
+    .storage_amount_per_byte;
 
     Ok(AccountTransferAllowance {
         account_id,
@@ -542,18 +557,17 @@ pub fn get_account_transfer_allowance(
     })
 }
 
-pub fn get_account_state(
+pub async fn get_account_state(
     connection_config: &ConnectionConfig,
     account_id: near_primitives::types::AccountId,
 ) -> color_eyre::eyre::Result<Option<near_primitives::views::AccountView>> {
-    let query_view_method_response = tokio::runtime::Runtime::new().unwrap().block_on(async {
+    let query_view_method_response =
         near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url())
             .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
                 block_reference: near_primitives::types::Finality::Final.into(),
                 request: near_primitives::views::QueryRequest::ViewAccount { account_id },
             })
-            .await
-    });
+            .await;
     match query_view_method_response {
         Ok(rpc_query_response) => {
             let account_view =

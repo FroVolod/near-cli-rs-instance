@@ -9,7 +9,11 @@ pub struct NetworkViewAtBlockArgs {
 }
 
 impl NetworkViewAtBlockArgs {
-    pub async fn process(&self, account_id: near_primitives::types::AccountId) -> crate::CliResult {
+    pub async fn process(
+        &self,
+        account_id: near_primitives::types::AccountId,
+        view_item: crate::common::ViewItems,
+    ) -> crate::CliResult {
         let connection_config: crate::common::ConnectionConfig = match self.network_name.as_str() {
             "testnet" => crate::common::ConnectionConfig::Testnet,
             "mainnet" => crate::common::ConnectionConfig::Mainnet,
@@ -17,7 +21,9 @@ impl NetworkViewAtBlockArgs {
             _ => todo!(),
         };
 
-        self.next.process(account_id, connection_config).await
+        self.next
+            .process(account_id, connection_config, view_item)
+            .await
     }
 }
 
@@ -38,21 +44,54 @@ impl ViewAtBlock {
         &self,
         account_id: near_primitives::types::AccountId,
         connection_config: crate::common::ConnectionConfig,
+        view_item: crate::common::ViewItems,
     ) -> crate::CliResult {
         match self {
             Self::Now => {
-                crate::common::display_account_info(
-                    account_id.clone(),
-                    &connection_config,
-                    near_primitives::types::Finality::Final.into(),
-                )
-                .await?;
-                crate::common::display_access_key_list(
-                    account_id,
-                    &connection_config,
-                    near_primitives::types::Finality::Final.into(),
-                )
-                .await?;
+                match view_item {
+                    crate::common::ViewItems::ViewAccessKeyList => {
+                        crate::common::display_access_key_list(
+                            account_id,
+                            &connection_config,
+                            near_primitives::types::Finality::Final.into(),
+                        )
+                        .await?;
+                    }
+                    crate::common::ViewItems::ViewAccountSummary => {
+                        crate::common::display_account_info(
+                            account_id.clone(),
+                            &connection_config,
+                            near_primitives::types::Finality::Final.into(),
+                        )
+                        .await?;
+                        crate::common::display_access_key_list(
+                            account_id,
+                            &connection_config,
+                            near_primitives::types::Finality::Final.into(),
+                        )
+                        .await?;
+                    }
+                    crate::common::ViewItems::ViewNonce => todo!("ViewNonce"),
+                    crate::common::ViewItems::ViewCallFunction => todo!("ViewCallFunction"),
+                    crate::common::ViewItems::ViewContractHash => todo!("ViewContractHash"),
+                    crate::common::ViewItems::ViewContractCode => todo!("ViewContractCode"),
+                    crate::common::ViewItems::ViewContractState => todo!("ViewContractState"),
+                    crate::common::ViewItems::ViewTransactionStatus => {
+                        todo!("ViewTransactionStatus")
+                    }
+                    crate::common::ViewItems::ViewNearBalance => {
+                        let account_transfer_allowance =
+                            crate::common::get_account_transfer_allowance(
+                                &connection_config,
+                                account_id,
+                            )
+                            .await?;
+                        println! {"{}", &account_transfer_allowance};
+                    }
+                    crate::common::ViewItems::ViewFtBalance => todo!("ViewFtBalance"),
+                    crate::common::ViewItems::ViewNftBalance => todo!("ViewNftBalance"),
+                }
+
                 Ok(())
             }
             _ => Ok(println!("view at block process")),
