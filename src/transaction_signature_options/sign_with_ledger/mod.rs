@@ -1,6 +1,5 @@
 use dialoguer::Input;
 use near_primitives::borsh::BorshSerialize;
-use std::str::FromStr;
 
 #[derive(Debug, Clone, interactive_clap_derive::InteractiveClap)]
 #[interactive_clap(skip_default_from_cli)]
@@ -8,7 +7,7 @@ pub struct SignLedger {
     #[interactive_clap(long)]
     #[interactive_clap(skip_default_from_cli_arg)]
     #[interactive_clap(skip_default_input_arg)]
-    pub seed_phrase_hd_path: String,
+    pub seed_phrase_hd_path: crate::types::slip10::BIP32Path,
     #[interactive_clap(skip)]
     pub signer_public_key: crate::types::public_key::PublicKey,
     #[interactive_clap(long)]
@@ -39,10 +38,10 @@ impl SignLedger {
             "Please allow getting the PublicKey on Ledger device (HD Path: {})",
             seed_phrase_hd_path
         );
-        let hd_path = slip10::BIP32Path::from_str(&seed_phrase_hd_path.as_str()).unwrap();
+        // let hd_path = slip10::BIP32Path::from_str(&seed_phrase_hd_path.as_str()).unwrap();
         let public_key = tokio::runtime::Runtime::new()
             .unwrap()
-            .block_on(async { near_ledger::get_public_key(hd_path).await })
+            .block_on(async { near_ledger::get_public_key(seed_phrase_hd_path.clone().into()).await })
             .map_err(|near_ledger_error| {
                 color_eyre::Report::msg(format!(
                     "An error occurred while trying to get PublicKey from Ledger device: {:?}",
@@ -70,7 +69,7 @@ impl SignLedger {
         })
     }
 
-    pub fn input_seed_phrase_hd_path() -> String {
+    pub fn input_seed_phrase_hd_path() -> crate::types::slip10::BIP32Path {
         Input::new()
             .with_prompt("Enter seed phrase HD Path (if you not sure leave blank for default)")
             .with_initial_text("44'/397'/0'/0'/1'")
@@ -83,8 +82,7 @@ impl SignLedger {
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         network_connection_config: crate::common::ConnectionConfig,
     ) -> crate::CliResult {
-        let seed_phrase_hd_path =
-            slip10::BIP32Path::from_str(&self.seed_phrase_hd_path.as_str()).unwrap();
+        let seed_phrase_hd_path =self.seed_phrase_hd_path.clone().into();
         let online_signer_access_key_response =
             near_jsonrpc_client::JsonRpcClient::connect(network_connection_config.rpc_url())
                 .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
