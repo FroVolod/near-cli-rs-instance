@@ -1,5 +1,7 @@
-mod view_account_summary;
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
+
+mod list_keys;
+mod view_account_summary;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct AccountCommands {
@@ -22,7 +24,9 @@ pub enum AccountActions {
     ViewAccountSummary(self::view_account_summary::ViewAccountSummary),
     CreateSubaccount,
     DeleteAccount,
-    ListKeys,
+    #[strum_discriminants(strum(message = "View a list of keys for an account"))]
+    ///View a list of keys for an account
+    ListKeys(self::list_keys::ViewListKeys),
     AddKey,
     DeleteKey,
     Login,
@@ -32,6 +36,7 @@ impl AccountActions {
     pub async fn process(&self) -> crate::CliResult {
         match self {
             Self::ViewAccountSummary(view_account_command) => view_account_command.process().await,
+            Self::ListKeys(view_list_keys) => view_list_keys.process().await,
             _ => todo!(),
         }
     }
