@@ -514,9 +514,10 @@ impl AccountTransferAllowance {
 pub async fn get_account_transfer_allowance(
     connection_config: &ConnectionConfig,
     account_id: near_primitives::types::AccountId,
+    block_reference: BlockReference,
 ) -> color_eyre::eyre::Result<AccountTransferAllowance> {
     let account_view = if let Some(account_view) =
-        get_account_state(connection_config, account_id.clone()).await?
+        get_account_state(connection_config, account_id.clone(), block_reference).await?
     {
         account_view
     } else {
@@ -560,14 +561,19 @@ pub async fn get_account_transfer_allowance(
 pub async fn get_account_state(
     connection_config: &ConnectionConfig,
     account_id: near_primitives::types::AccountId,
+    block_reference: BlockReference,
 ) -> color_eyre::eyre::Result<Option<near_primitives::views::AccountView>> {
-    let query_view_method_response =
-        near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url())
-            .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-                block_reference: near_primitives::types::Finality::Final.into(),
-                request: near_primitives::views::QueryRequest::ViewAccount { account_id },
-            })
-            .await;
+    let server_addr = match block_reference {
+        BlockReference::Finality(_) => connection_config.rpc_url(),
+        BlockReference::BlockId(_) => connection_config.archival_rpc_url(),
+        BlockReference::SyncCheckpoint(_) => todo!(),
+    };
+    let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(server_addr)
+        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
+            block_reference,
+            request: near_primitives::views::QueryRequest::ViewAccount { account_id },
+        })
+        .await;
     match query_view_method_response {
         Ok(rpc_query_response) => {
             let account_view =

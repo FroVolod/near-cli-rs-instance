@@ -9,9 +9,12 @@ pub struct ViewListKeys {
 
 impl ViewListKeys {
     pub async fn process(&self) -> crate::CliResult {
-        let view_item = crate::common::ViewItems::ViewAccessKeyList;
-        self.network
-            .process(self.account_id.clone().into(), view_item)
-            .await
+        crate::common::display_access_key_list(
+            self.account_id.clone().into(),
+            &self.network.get_connection_config(),
+            self.network.get_block_ref(),
+        )
+        .await?;
+        Ok(())
     }
 }

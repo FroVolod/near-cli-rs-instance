@@ -41,7 +41,9 @@ impl SignLedger {
         // let hd_path = slip10::BIP32Path::from_str(&seed_phrase_hd_path.as_str()).unwrap();
         let public_key = tokio::runtime::Runtime::new()
             .unwrap()
-            .block_on(async { near_ledger::get_public_key(seed_phrase_hd_path.clone().into()).await })
+            .block_on(async {
+                near_ledger::get_public_key(seed_phrase_hd_path.clone().into()).await
+            })
             .map_err(|near_ledger_error| {
                 color_eyre::Report::msg(format!(
                     "An error occurred while trying to get PublicKey from Ledger device: {:?}",
@@ -82,7 +84,7 @@ impl SignLedger {
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         network_connection_config: crate::common::ConnectionConfig,
     ) -> crate::CliResult {
-        let seed_phrase_hd_path =self.seed_phrase_hd_path.clone().into();
+        let seed_phrase_hd_path = self.seed_phrase_hd_path.clone().into();
         let online_signer_access_key_response =
             near_jsonrpc_client::JsonRpcClient::connect(network_connection_config.rpc_url())
                 .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
