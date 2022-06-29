@@ -12,20 +12,28 @@ pub struct SendNearCommand {
 impl SendNearCommand {
     pub async fn process(
         &self,
-        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
+        owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
-        let action = near_primitives::transaction::Action::Transfer(
-            near_primitives::transaction::TransferAction {
-                deposit: self.amount_in_near.to_yoctonear(),
-            },
-        );
-        let mut actions = prepopulated_unsigned_transaction.actions.clone();
-        actions.push(action);
-        let unsigned_transaction = near_primitives::transaction::Transaction {
-            actions,
+        let prepopulated_unsigned_transaction = near_primitives::transaction::Transaction {
+            signer_id: owner_account_id,
+            public_key: near_crypto::PublicKey::empty(near_crypto::KeyType::ED25519),
+            nonce: 0,
             receiver_id: self.receiver_account_id.clone().into(),
-            ..prepopulated_unsigned_transaction
+            block_hash: Default::default(),
+            actions: vec![near_primitives::transaction::Action::Transfer(
+                near_primitives::transaction::TransferAction {
+                    deposit: self.amount_in_near.to_yoctonear(),
+                },
+            )],
         };
-        self.network.process(unsigned_transaction).await
+
+        match self.network.get_sign_option() {
+            super::super::super::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(sign_private_key) =>
+                sign_private_key.process(prepopulated_unsigned_transaction, self.network.get_connection_config()).await,
+            super::super::super::transaction_signature_options::SignWith::SignWithKeychain(sign_keychain) =>
+                sign_keychain.process(prepopulated_unsigned_transaction, self.network.get_connection_config()).await,
+            super::super::super::transaction_signature_options::SignWith::SignWithLedger(sign_ledger) =>
+                sign_ledger.process(prepopulated_unsigned_transaction, self.network.get_connection_config()).await
+        }
     }
 }

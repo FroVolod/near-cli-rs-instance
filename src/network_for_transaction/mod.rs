@@ -7,24 +7,16 @@ pub struct NetworkForTransactionArgs {
 }
 
 impl NetworkForTransactionArgs {
-    pub async fn process(
-        &self,
-        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
-    ) -> crate::CliResult {
-        let connection_config: crate::common::ConnectionConfig = match self.network_name.as_str() {
+    pub fn get_connection_config(&self) -> crate::common::ConnectionConfig {
+        match self.network_name.as_str() {
             "testnet" => crate::common::ConnectionConfig::Testnet,
             "mainnet" => crate::common::ConnectionConfig::Mainnet,
             "betanet" => crate::common::ConnectionConfig::Betanet,
             _ => todo!(),
-        };
-        println!("===========================");
-        println!(
-            "===  prepopulated_unsigned_transaction: {:?}",
-            &prepopulated_unsigned_transaction
-        );
-        println!("===========================");
-        self.transaction_signature_options
-            .process(prepopulated_unsigned_transaction, connection_config)
-            .await
+        }
+    }
+
+    pub fn get_sign_option(&self) -> super::transaction_signature_options::SignWith {
+        self.transaction_signature_options.get_sign_option()
     }
 }

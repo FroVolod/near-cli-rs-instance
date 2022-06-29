@@ -14,13 +14,10 @@ pub struct TokensCommands {
 impl TokensCommands {
     pub async fn process(
         &self,
-        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
-        let unsigned_transaction = near_primitives::transaction::Transaction {
-            signer_id: self.owner_account_id.clone().into(),
-            ..prepopulated_unsigned_transaction
-        };
-        self.tokens_actions.process(unsigned_transaction).await
+        self.tokens_actions
+            .process(self.owner_account_id.clone().into())
+            .await
     }
 }
 
@@ -43,18 +40,12 @@ pub enum TokensActions {
 impl TokensActions {
     async fn process(
         &self,
-        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
+        owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
         match self {
-            Self::SendNear(send_near_command) => {
-                send_near_command
-                    .process(prepopulated_unsigned_transaction)
-                    .await
-            }
+            Self::SendNear(send_near_command) => send_near_command.process(owner_account_id).await,
             Self::ViewNearBalance(view_near_balance) => {
-                view_near_balance
-                    .process(prepopulated_unsigned_transaction.signer_id)
-                    .await
+                view_near_balance.process(owner_account_id).await
             }
             _ => todo!(),
         }

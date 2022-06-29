@@ -12,14 +12,8 @@ pub struct SignWithArgs {
 }
 
 impl SignWithArgs {
-    pub async fn process(
-        &self,
-        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
-        connection_config: crate::common::ConnectionConfig,
-    ) -> crate::CliResult {
-        self.sign_with
-            .process(prepopulated_unsigned_transaction, connection_config)
-            .await
+    pub fn get_sign_option(&self) -> SignWith {
+        self.sign_with.clone()
     }
 }
 
@@ -36,32 +30,6 @@ pub enum SignWith {
     #[strum_discriminants(strum(message = "Sign with private key"))]
     ///Sign with private key
     SignWithPlaintextPrivateKey(self::sign_with_private_key::SignPrivateKey),
-}
-
-impl SignWith {
-    pub async fn process(
-        &self,
-        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
-        connection_config: crate::common::ConnectionConfig,
-    ) -> crate::CliResult {
-        match self {
-            Self::SignWithKeychain(sign_keychain) => {
-                sign_keychain
-                    .process(prepopulated_unsigned_transaction, connection_config)
-                    .await
-            }
-            Self::SignWithPlaintextPrivateKey(sign_private_key) => {
-                sign_private_key
-                    .process(prepopulated_unsigned_transaction, connection_config)
-                    .await
-            }
-            Self::SignWithLedger(sign_ledger) => {
-                sign_ledger
-                    .process(prepopulated_unsigned_transaction, connection_config)
-                    .await
-            }
-        }
-    }
 }
 
 pub fn input_signer_public_key() -> color_eyre::eyre::Result<crate::types::public_key::PublicKey> {
