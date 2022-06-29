@@ -12,9 +12,7 @@ pub struct TokensCommands {
 }
 
 impl TokensCommands {
-    pub async fn process(
-        &self,
-    ) -> crate::CliResult {
+    pub async fn process(&self) -> crate::CliResult {
         self.tokens_actions
             .process(self.owner_account_id.clone().into())
             .await
