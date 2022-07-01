@@ -31,5 +31,5 @@ impl TopLevelCommand {
 // pub struct ContractCommands {
 //     contract_id: String,
 //     #[interactive_clap(subcommand)]
-//     network: super::network_for_transaction::NetworkForTransaction,
+//     network: crate::network_for_transaction::NetworkForTransaction,
 // }

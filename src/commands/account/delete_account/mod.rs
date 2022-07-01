@@ -21,7 +21,7 @@ pub struct BeneficiaryAccount {
     pub beneficiary_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(named_arg)]
     ///Select online mode
-    network: super::super::super::network_for_transaction::NetworkForTransactionArgs,
+    network: crate::network_for_transaction::NetworkForTransactionArgs,
 }
 
 impl BeneficiaryAccount {

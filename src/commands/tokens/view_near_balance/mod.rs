@@ -2,7 +2,7 @@
 pub struct ViewNearBalance {
     #[interactive_clap(named_arg)]
     /// Select online mode
-    network: super::super::super::network_view_at_block::NetworkViewAtBlockArgs,
+    network: crate::network_view_at_block::NetworkViewAtBlockArgs,
 }
 
 impl ViewNearBalance {
