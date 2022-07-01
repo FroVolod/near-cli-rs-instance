@@ -16,7 +16,7 @@ impl NetworkForTransactionArgs {
         }
     }
 
-    pub fn get_sign_option(&self) -> super::transaction_signature_options::SignWith {
+    pub fn get_sign_option(&self) -> crate::transaction_signature_options::SignWith {
         self.transaction_signature_options.get_sign_option()
     }
 }
