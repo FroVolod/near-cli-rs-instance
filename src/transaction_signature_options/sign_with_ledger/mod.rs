@@ -38,7 +38,6 @@ impl SignLedger {
             "Please allow getting the PublicKey on Ledger device (HD Path: {})",
             seed_phrase_hd_path
         );
-        // let hd_path = slip10::BIP32Path::from_str(&seed_phrase_hd_path.as_str()).unwrap();
         let public_key = tokio::runtime::Runtime::new()
             .unwrap()
             .block_on(async {
