@@ -40,12 +40,32 @@ impl BeneficiaryAccount {
         };
 
         match self.network.get_sign_option() {
-            crate::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(sign_private_key) =>
-                sign_private_key.process(prepopulated_unsigned_transaction, self.network.get_connection_config()).await,
-            crate::transaction_signature_options::SignWith::SignWithKeychain(sign_keychain) =>
-                sign_keychain.process(prepopulated_unsigned_transaction, self.network.get_connection_config()).await,
-            crate::transaction_signature_options::SignWith::SignWithLedger(sign_ledger) =>
-                sign_ledger.process(prepopulated_unsigned_transaction, self.network.get_connection_config()).await
+            crate::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(
+                sign_private_key,
+            ) => {
+                sign_private_key
+                    .process(
+                        prepopulated_unsigned_transaction,
+                        self.network.get_connection_config(),
+                    )
+                    .await
+            }
+            crate::transaction_signature_options::SignWith::SignWithKeychain(sign_keychain) => {
+                sign_keychain
+                    .process(
+                        prepopulated_unsigned_transaction,
+                        self.network.get_connection_config(),
+                    )
+                    .await
+            }
+            crate::transaction_signature_options::SignWith::SignWithLedger(sign_ledger) => {
+                sign_ledger
+                    .process(
+                        prepopulated_unsigned_transaction,
+                        self.network.get_connection_config(),
+                    )
+                    .await
+            }
         }
     }
 }
