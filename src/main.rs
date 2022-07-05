@@ -7,6 +7,7 @@ mod network_for_transaction;
 mod network_view_at_block;
 mod transaction_signature_options;
 mod types;
+mod utils_command;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 struct Cmd {

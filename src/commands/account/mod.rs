@@ -1,5 +1,6 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
+mod create_subaccount;
 mod delete_account;
 mod list_keys;
 mod view_account_summary;
@@ -21,9 +22,11 @@ impl AccountCommands {
 ///Сhoose action for account
 pub enum AccountActions {
     #[strum_discriminants(strum(message = "View properties for an account"))]
-    /// View properties for an account
+    ///View properties for an account
     ViewAccountSummary(self::view_account_summary::ViewAccountSummary),
-    CreateSubaccount,
+    #[strum_discriminants(strum(message = "Create a new sub-account"))]
+    ///Create a new sub-account
+    CreateSubaccount(self::create_subaccount::SubAccount),
     #[strum_discriminants(strum(message = "Delete this account"))]
     ///Delete this account
     DeleteAccount(self::delete_account::DeleteAccount),
@@ -41,6 +44,7 @@ impl AccountActions {
             Self::ViewAccountSummary(view_account_command) => view_account_command.process().await,
             Self::ListKeys(view_list_keys) => view_list_keys.process().await,
             Self::DeleteAccount(delete_account) => delete_account.process().await,
+            Self::CreateSubaccount(sub_account) => sub_account.process().await,
             _ => todo!(),
         }
     }
