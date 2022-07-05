@@ -2,8 +2,8 @@
 pub struct NetworkForTransactionArgs {
     ///What is the name of the network
     network_name: String,
-    #[interactive_clap(named_arg)]
-    transaction_signature_options: crate::transaction_signature_options::SignWithArgs,
+    #[interactive_clap(subcommand)]
+    transaction_signature_options: crate::transaction_signature_options::SignWith,
 }
 
 impl NetworkForTransactionArgs {

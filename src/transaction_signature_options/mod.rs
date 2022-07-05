@@ -5,18 +5,6 @@ pub mod sign_with_keychain;
 pub mod sign_with_ledger;
 pub mod sign_with_private_key;
 
-#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
-pub struct SignWithArgs {
-    #[interactive_clap(subcommand)]
-    sign_with: SignWith,
-}
-
-impl SignWithArgs {
-    pub fn get_sign_option(&self) -> SignWith {
-        self.sign_with.clone()
-    }
-}
-
 #[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select a tool for signing the transaction
@@ -30,6 +18,12 @@ pub enum SignWith {
     #[strum_discriminants(strum(message = "Sign with private key"))]
     ///Sign with private key
     SignWithPlaintextPrivateKey(self::sign_with_private_key::SignPrivateKey),
+}
+
+impl SignWith {
+    pub fn get_sign_option(&self) -> Self {
+        self.clone()
+    }
 }
 
 pub fn input_signer_public_key() -> color_eyre::eyre::Result<crate::types::public_key::PublicKey> {
