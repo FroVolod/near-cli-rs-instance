@@ -6,7 +6,7 @@ mod use_public_key;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct SubAccount {
-    ///What is the receiver account ID?
+    ///What is the sub-account ID?
     new_account_id: crate::types::account_id::AccountId,
     ///Enter the amount for the subaccount
     initial_balance: crate::common::NearBalance,
