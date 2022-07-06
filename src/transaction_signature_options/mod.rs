@@ -20,12 +20,6 @@ pub enum SignWith {
     SignWithPlaintextPrivateKey(self::sign_with_private_key::SignPrivateKey),
 }
 
-impl SignWith {
-    pub fn get_sign_option(&self) -> Self {
-        self.clone()
-    }
-}
-
 pub fn input_signer_public_key() -> color_eyre::eyre::Result<crate::types::public_key::PublicKey> {
     Ok(Input::new()
         .with_prompt("Enter sender (signer) public key")
