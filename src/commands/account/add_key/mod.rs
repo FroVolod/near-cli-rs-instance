@@ -1,8 +1,7 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
+mod access_key_type;
 mod autogenerate_new_keypair;
-mod full_access_type;
-// mod function_call_type;
 mod use_manually_provided_seed_phrase;
 mod use_public_key;
 
@@ -30,6 +29,11 @@ impl Account {
                     .process(prepopulated_unsigned_transaction)
                     .await
             }
+            AccessKeyPermission::GrantFunctionCallAccess(function_call_type) => {
+                function_call_type
+                    .process(prepopulated_unsigned_transaction)
+                    .await
+            }
         }
     }
 }
@@ -38,17 +42,17 @@ impl Account {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select a permission that you want to add to the access key
 pub enum AccessKeyPermission {
-    // #[strum_discriminants(strum(message = "A permission with function call"))]
-    // /// Provide data for a function-call access key
-    // GrantFunctionCallAccess(self::function_call_type::FunctionCallType),
+    #[strum_discriminants(strum(message = "A permission with function call"))]
+    /// Provide data for a function-call access key
+    GrantFunctionCallAccess(self::access_key_type::FunctionCallType),
     #[strum_discriminants(strum(message = "A permission with full access"))]
     /// Provide data for a full access key
-    GrantFullAccess(self::full_access_type::FullAccessType),
+    GrantFullAccess(self::access_key_type::FullAccessType),
 }
 
 #[derive(Debug, Clone, EnumDiscriminants, interactive_clap::InteractiveClap)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
-///Add a full access key for the sub-account
+///Add an access key for this account
 pub enum AccessKeyMode {
     #[strum_discriminants(strum(message = "Automatically generate a key pair"))]
     ///Automatically generate a key pair

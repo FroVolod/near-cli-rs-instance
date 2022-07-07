@@ -24,7 +24,7 @@ impl GenerateKeypair {
 
 #[derive(Debug, Clone, EnumDiscriminants, interactive_clap::InteractiveClap)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
-///Add a full access key for the sub-account
+///Save an access key for this account
 pub enum SaveMode {
     #[strum_discriminants(strum(message = "Save automatically generated key pair to keychain"))]
     ///Save automatically generated key pair to keychain
