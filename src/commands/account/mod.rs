@@ -38,7 +38,9 @@ pub enum AccountActions {
     #[strum_discriminants(strum(message = "Add an access key for this account"))]
     ///Add an access key for this account
     AddKey(self::add_key::AddKeyCommand),
-    DeleteKey,
+    #[strum_discriminants(strum(message = "Delete an access key for this account"))]
+    ///Delete an access key for this account
+    DeleteKey(self::delete_key::DeleteKeyCommand),
     Login,
 }
 
@@ -50,6 +52,7 @@ impl AccountActions {
             Self::DeleteAccount(delete_account) => delete_account.process().await,
             Self::CreateSubaccount(sub_account) => sub_account.process().await,
             Self::AddKey(add_key_command) => add_key_command.process().await,
+            Self::DeleteKey(delete_key_command) => delete_key_command.process().await,
             _ => todo!(),
         }
     }
