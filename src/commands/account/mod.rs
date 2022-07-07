@@ -1,5 +1,6 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
+mod add_key;
 mod create_subaccount;
 mod delete_account;
 mod list_keys;
@@ -33,7 +34,9 @@ pub enum AccountActions {
     #[strum_discriminants(strum(message = "View a list of keys for an account"))]
     ///View a list of keys for an account
     ListKeys(self::list_keys::ViewListKeys),
-    AddKey,
+    #[strum_discriminants(strum(message = "Add an access key for this account"))]
+    ///Add an access key for this account
+    AddKey(self::add_key::Account),
     DeleteKey,
     Login,
 }
@@ -45,6 +48,7 @@ impl AccountActions {
             Self::ListKeys(view_list_keys) => view_list_keys.process().await,
             Self::DeleteAccount(delete_account) => delete_account.process().await,
             Self::CreateSubaccount(sub_account) => sub_account.process().await,
+            Self::AddKey(account) => account.process().await,
             _ => todo!(),
         }
     }
