@@ -6,14 +6,14 @@ mod use_manually_provided_seed_phrase;
 mod use_public_key;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
-pub struct Account {
+pub struct AddKeyCommand {
     ///Which account should You add an access key to?
     owner_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(subcommand)]
     pub permission: AccessKeyPermission,
 }
 
-impl Account {
+impl AddKeyCommand {
     pub async fn process(&self) -> crate::CliResult {
         let prepopulated_unsigned_transaction = near_primitives::transaction::Transaction {
             signer_id: self.owner_account_id.clone().into(),
