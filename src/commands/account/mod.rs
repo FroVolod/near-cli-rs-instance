@@ -4,6 +4,7 @@ mod add_key;
 mod create_subaccount;
 mod delete_account;
 mod delete_key;
+mod import_account;
 mod list_keys;
 mod view_account_summary;
 
@@ -41,7 +42,9 @@ pub enum AccountActions {
     #[strum_discriminants(strum(message = "Delete an access key for this account"))]
     ///Delete an access key for this account
     DeleteKey(self::delete_key::DeleteKeyCommand),
-    Login,
+    #[strum_discriminants(strum(message = "Login with wallet authorization"))]
+    ///Use these to login with wallet authorization
+    ImportAccount(self::import_account::Login),
 }
 
 impl AccountActions {
@@ -53,7 +56,7 @@ impl AccountActions {
             Self::CreateSubaccount(sub_account) => sub_account.process().await,
             Self::AddKey(add_key_command) => add_key_command.process().await,
             Self::DeleteKey(delete_key_command) => delete_key_command.process().await,
-            _ => todo!(),
+            Self::ImportAccount(login) => login.process().await,
         }
     }
 }

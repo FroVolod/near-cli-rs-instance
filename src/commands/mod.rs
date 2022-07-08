@@ -8,9 +8,9 @@ mod tokens;
 ///Choose action
 pub enum TopLevelCommand {
     #[strum_discriminants(strum(
-        message = "View account summary, create subaccount, delete account, list keys, add key, delete key"
+        message = "View account summary, create subaccount, delete account, list keys, add key, delete key, import account"
     ))]
-    ///View account summary, create subaccount, delete account, list keys, add key, delete key
+    ///View account summary, create subaccount, delete account, list keys, add key, delete key, import account
     Account(self::account::AccountCommands),
     #[strum_discriminants(strum(message = "Use this for token actions"))]
     ///Use this for token actions
