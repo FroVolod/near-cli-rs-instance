@@ -2,6 +2,7 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 mod call_function;
 mod deploy;
+mod download_wasm;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct ContractCommands {
@@ -27,7 +28,7 @@ pub enum ContractActions {
     Deploy(self::deploy::Contract),
     #[strum_discriminants(strum(message = "Download wasm"))]
     ///Download wasm
-    DownloadWasm,
+    DownloadWasm(self::download_wasm::DownloadContract),
     #[strum_discriminants(strum(message = "Inspect storage"))]
     ///Inspect storage
     InspectStorage,
@@ -38,6 +39,7 @@ impl ContractActions {
         match self {
             Self::CallFunction(call_function_commands) => call_function_commands.process().await,
             Self::Deploy(contract) => contract.process().await,
+            Self::DownloadWasm(download_contract) => download_contract.process().await,
             _ => todo!(),
         }
     }

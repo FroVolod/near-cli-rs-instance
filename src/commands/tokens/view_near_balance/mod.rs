@@ -1,7 +1,7 @@
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct ViewNearBalance {
     #[interactive_clap(named_arg)]
-    /// Select online mode
+    ///Select online mode
     network: crate::network_view_at_block::NetworkViewAtBlockArgs,
 }
 
