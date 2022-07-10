@@ -1,6 +1,7 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 mod as_read_only;
+mod as_transaction;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct CallFunctionCommands {
@@ -23,14 +24,14 @@ pub enum CallFunctionActions {
     AsReadOnly(self::as_read_only::CallFunctionView),
     #[strum_discriminants(strum(message = "Calling a change method"))]
     ///Calling a change method
-    AsTransaction,
+    AsTransaction(self::as_transaction::CallFunctionAction),
 }
 
 impl CallFunctionActions {
     pub async fn process(&self) -> crate::CliResult {
         match self {
             Self::AsReadOnly(call_function_view) => call_function_view.process().await,
-            _ => todo!(),
+            Self::AsTransaction(call_function_action) => call_function_action.process().await,
         }
     }
 }
