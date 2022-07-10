@@ -1,6 +1,7 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 mod call_function;
+mod deploy;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct ContractCommands {
@@ -23,7 +24,7 @@ pub enum ContractActions {
     CallFunction(self::call_function::CallFunctionCommands),
     #[strum_discriminants(strum(message = "Add a new contract code"))]
     ///Add a contract code
-    Deploy,
+    Deploy(self::deploy::Contract),
     #[strum_discriminants(strum(message = "Download wasm"))]
     ///Download wasm
     DownloadWasm,
@@ -36,6 +37,7 @@ impl ContractActions {
     pub async fn process(&self) -> crate::CliResult {
         match self {
             Self::CallFunction(call_function_commands) => call_function_commands.process().await,
+            Self::Deploy(contract) => contract.process().await,
             _ => todo!(),
         }
     }

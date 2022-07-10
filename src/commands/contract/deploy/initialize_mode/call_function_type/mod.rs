@@ -2,8 +2,6 @@ use dialoguer::Input;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct CallFunctionAction {
-    ///What is the contract account ID?
-    contract_account_id: crate::types::account_id::AccountId,
     ///What is the name of the function?
     function_name: String,
     ///Enter arguments to this function
@@ -16,8 +14,6 @@ pub struct CallFunctionAction {
     #[interactive_clap(skip_default_input_arg)]
     ///Enter deposit for a function call
     deposit: crate::common::NearBalance,
-    ///What is the signer account ID?
-    signer_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(named_arg)]
     ///Select online mode
     network: crate::network_for_transaction::NetworkForTransactionArgs,
@@ -53,23 +49,25 @@ impl CallFunctionAction {
             .interact_text()?;
         Ok(deposit)
     }
-    pub async fn process(&self) -> crate::CliResult {
-        let prepopulated_unsigned_transaction = near_primitives::transaction::Transaction {
-            signer_id: self.signer_account_id.clone().into(),
-            public_key: near_crypto::PublicKey::empty(near_crypto::KeyType::ED25519),
-            nonce: 0,
-            receiver_id: self.contract_account_id.clone().into(),
-            block_hash: Default::default(),
-            actions: vec![near_primitives::transaction::Action::FunctionCall(
-                near_primitives::transaction::FunctionCallAction {
-                    method_name: self.function_name.clone(),
-                    args: self.function_args.clone().into_bytes(),
-                    gas: self.gas.clone().inner,
-                    deposit: self.deposit.clone().to_yoctonear(),
-                },
-            )],
-        };
 
+    pub async fn process(
+        &self,
+        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
+    ) -> crate::CliResult {
+        let action = near_primitives::transaction::Action::FunctionCall(
+            near_primitives::transaction::FunctionCallAction {
+                method_name: self.function_name.clone(),
+                args: self.function_args.clone().into_bytes(),
+                gas: self.gas.clone().inner,
+                deposit: self.deposit.clone().to_yoctonear(),
+            },
+        );
+        let mut actions = prepopulated_unsigned_transaction.actions.clone();
+        actions.push(action);
+        let prepopulated_unsigned_transaction = near_primitives::transaction::Transaction {
+            actions,
+            ..prepopulated_unsigned_transaction
+        };
         match self.network.get_sign_option() {
             crate::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(
                 sign_private_key,
