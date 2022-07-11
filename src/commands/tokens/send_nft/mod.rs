@@ -3,13 +3,13 @@ use dialoguer::Input;
 
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
-pub struct SendFtCommand {
-    ///What is the ft-contract account ID?
-    ft_contract_account_id: crate::types::account_id::AccountId,
+pub struct SendNFtCommand {
+    ///What is the nft-contract account ID?
+    nft_contract_account_id: crate::types::account_id::AccountId,
     ///What is the receiver account ID?
     receiver_account_id: crate::types::account_id::AccountId,
-    ///Enter an amount FT to transfer
-    amount: u128,
+    ///Enter an amount NFT to transfer
+    token_id: String,
     #[interactive_clap(long = "prepaid-gas")]
     #[interactive_clap(skip_default_input_arg)]
     ///Enter gas for function call
@@ -23,7 +23,7 @@ pub struct SendFtCommand {
     network: crate::network_for_transaction::NetworkForTransactionArgs,
 }
 
-impl SendFtCommand {
+impl SendNFtCommand {
     fn input_gas(_context: &()) -> color_eyre::eyre::Result<crate::common::NearGas> {
         println!();
         let gas: u64 = loop {
@@ -58,10 +58,10 @@ impl SendFtCommand {
         &self,
         owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
-        let method_name = "ft_transfer".to_string();
+        let method_name = "nft_transfer".to_string();
         let args = json!({
             "receiver_id": self.receiver_account_id.to_string(),
-            "amount": self.amount.to_string()
+            "token_id": self.token_id
         })
         .to_string()
         .into_bytes();
@@ -69,7 +69,7 @@ impl SendFtCommand {
             signer_id: owner_account_id,
             public_key: near_crypto::PublicKey::empty(near_crypto::KeyType::ED25519),
             nonce: 0,
-            receiver_id: self.ft_contract_account_id.clone().into(),
+            receiver_id: self.nft_contract_account_id.clone().into(),
             block_hash: Default::default(),
             actions: vec![near_primitives::transaction::Action::FunctionCall(
                 near_primitives::transaction::FunctionCallAction {

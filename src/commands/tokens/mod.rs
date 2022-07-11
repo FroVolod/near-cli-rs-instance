@@ -2,6 +2,7 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 mod send_ft;
 mod send_near;
+mod send_nft;
 mod view_near_balance;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
@@ -30,7 +31,9 @@ pub enum TokensActions {
     #[strum_discriminants(strum(message = "The transfer is carried out in FT tokens"))]
     ///The transfer is carried out in FT tokens
     SendFt(self::send_ft::SendFtCommand),
-    SendNft,
+    #[strum_discriminants(strum(message = "The transfer is carried out in NFT tokens"))]
+    ///The transfer is carried out in NFT tokens
+    SendNft(self::send_nft::SendNFtCommand),
     #[strum_discriminants(strum(message = "View the balance of Near tokens"))]
     ///View the balance of Near tokens
     ViewNearBalance(self::view_near_balance::ViewNearBalance),
@@ -49,6 +52,7 @@ impl TokensActions {
                 view_near_balance.process(owner_account_id).await
             },
             Self::SendFt(send_ft_command) => send_ft_command.process(owner_account_id).await,
+            Self::SendNft(send_nft_command) => send_nft_command.process(owner_account_id).await,
             _ => todo!(),
         }
     }
