@@ -2,7 +2,7 @@ use serde_json::json;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct ViewFtBalance {
-    ///What is the nft-contract account ID?
+    ///What is the ft-contract account ID?
     ft_contract_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(named_arg)]
     ///Select online mode
@@ -10,11 +10,13 @@ pub struct ViewFtBalance {
 }
 
 impl ViewFtBalance {
-    pub async fn process(&self,
+    pub async fn process(
+        &self,
+        owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
         let method_name = "ft_balance_of".to_string();
         let args = json!({
-            "account_id": self.ft_contract_account_id.to_string(),
+            "account_id": owner_account_id.to_string(),
         })
         .to_string()
         .into_bytes();

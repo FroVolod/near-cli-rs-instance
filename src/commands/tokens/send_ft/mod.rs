@@ -1,6 +1,5 @@
-use serde_json::json;
 use dialoguer::Input;
-
+use serde_json::json;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct SendFtCommand {
