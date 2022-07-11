@@ -4,6 +4,7 @@ mod send_ft;
 mod send_near;
 mod send_nft;
 mod view_near_balance;
+mod view_ft_balance;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct TokensCommands {
@@ -37,7 +38,9 @@ pub enum TokensActions {
     #[strum_discriminants(strum(message = "View the balance of Near tokens"))]
     ///View the balance of Near tokens
     ViewNearBalance(self::view_near_balance::ViewNearBalance),
-    ViewFtBalance,
+    #[strum_discriminants(strum(message = "View the balance of FT tokens"))]
+    ///View the balance of FT tokens
+    ViewFtBalance(self::view_ft_balance::ViewFtBalance),
     ViewNftBalance,
 }
 
@@ -53,6 +56,7 @@ impl TokensActions {
             },
             Self::SendFt(send_ft_command) => send_ft_command.process(owner_account_id).await,
             Self::SendNft(send_nft_command) => send_nft_command.process(owner_account_id).await,
+            Self::ViewFtBalance(view_ft_balance) => view_ft_balance.process().await,
             _ => todo!(),
         }
     }
