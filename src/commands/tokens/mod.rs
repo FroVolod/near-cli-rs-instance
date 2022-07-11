@@ -3,8 +3,9 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 mod send_ft;
 mod send_near;
 mod send_nft;
-mod view_near_balance;
 mod view_ft_balance;
+mod view_near_balance;
+mod view_nft_assets;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct TokensCommands {
@@ -41,7 +42,9 @@ pub enum TokensActions {
     #[strum_discriminants(strum(message = "View the balance of FT tokens"))]
     ///View the balance of FT tokens
     ViewFtBalance(self::view_ft_balance::ViewFtBalance),
-    ViewNftBalance,
+    #[strum_discriminants(strum(message = "View the balance of NFT tokens"))]
+    ///View the balance of NFT tokens
+    ViewNftAssets(self::view_nft_assets::ViewNftAssets),
 }
 
 impl TokensActions {
@@ -53,11 +56,11 @@ impl TokensActions {
             Self::SendNear(send_near_command) => send_near_command.process(owner_account_id).await,
             Self::ViewNearBalance(view_near_balance) => {
                 view_near_balance.process(owner_account_id).await
-            },
+            }
             Self::SendFt(send_ft_command) => send_ft_command.process(owner_account_id).await,
             Self::SendNft(send_nft_command) => send_nft_command.process(owner_account_id).await,
-            Self::ViewFtBalance(view_ft_balance) => view_ft_balance.process().await,
-            _ => todo!(),
+            Self::ViewFtBalance(view_ft_balance) => view_ft_balance.process(owner_account_id).await,
+            Self::ViewNftAssets(view_nft_assets) => view_nft_assets.process(owner_account_id).await,
         }
     }
 }
