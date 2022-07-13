@@ -15,7 +15,7 @@ impl DeleteAccount {
     }
 }
 
-#[derive(Debug, Clone, interactive_clap_derive::InteractiveClap)]
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct BeneficiaryAccount {
     ///Specify a beneficiary
     pub beneficiary_account_id: crate::types::account_id::AccountId,
