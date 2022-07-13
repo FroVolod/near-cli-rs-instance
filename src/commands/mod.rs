@@ -28,7 +28,7 @@ pub enum TopLevelCommand {
         message = "Use this to construct transactions or view the status of a transaction."
     ))]
     ///Use this to construct transactions or view the status of a transaction.
-    Transaction(self::transaction::TransactionCommands)
+    Transaction(self::transaction::TransactionCommands),
 }
 
 impl TopLevelCommand {
@@ -37,7 +37,7 @@ impl TopLevelCommand {
             Self::Tokens(tokens_commands) => tokens_commands.process().await,
             Self::Account(account_commands) => account_commands.process().await,
             Self::Contract(contract_commands) => contract_commands.process().await,
-            Self::Transaction(transaction_commands) => transaction_commands.process().await
+            Self::Transaction(transaction_commands) => transaction_commands.process().await,
         }
     }
 }

@@ -1,5 +1,6 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
+mod construct_transaction;
 mod view_status;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
@@ -23,14 +24,42 @@ pub enum TransactionActions {
     ViewStatus(self::view_status::TransactionInfo),
     #[strum_discriminants(strum(message = "Construct a new transaction"))]
     ///Construct a new transaction
-    ConstructTransaction,
+    ConstructTransaction(TransactionAccounts),
 }
 
 impl TransactionActions {
     pub async fn process(&self) -> crate::CliResult {
         match self {
             Self::ViewStatus(transaction_info) => transaction_info.process().await,
-            _ => todo!(),
+            Self::ConstructTransaction(transaction_accounts) => {
+                transaction_accounts.process().await
+            }
         }
+    }
+}
+
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+pub struct TransactionAccounts {
+    ///What is the sender account ID?
+    sender_account_id: crate::types::account_id::AccountId,
+    ///What is the receiver account ID?
+    receiver_account_id: crate::types::account_id::AccountId,
+    #[interactive_clap(subcommand)]
+    next_actions: self::construct_transaction::NextAction,
+}
+
+impl TransactionAccounts {
+    pub async fn process(&self) -> crate::CliResult {
+        let prepopulated_unsigned_transaction = near_primitives::transaction::Transaction {
+            signer_id: self.sender_account_id.clone().into(),
+            public_key: near_crypto::PublicKey::empty(near_crypto::KeyType::ED25519),
+            nonce: 0,
+            receiver_id: self.receiver_account_id.clone().into(),
+            block_hash: Default::default(),
+            actions: vec![],
+        };
+        self.next_actions
+            .process(prepopulated_unsigned_transaction)
+            .await
     }
 }
