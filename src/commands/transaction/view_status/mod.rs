@@ -11,9 +11,7 @@ pub struct TransactionInfo {
 }
 
 impl TransactionInfo {
-    pub async fn process(
-        &self,
-    ) -> crate::CliResult {
+    pub async fn process(&self) -> crate::CliResult {
         let connection_config = match self.network_name.as_str() {
             "testnet" => crate::common::ConnectionConfig::Testnet,
             "mainnet" => crate::common::ConnectionConfig::Mainnet,
