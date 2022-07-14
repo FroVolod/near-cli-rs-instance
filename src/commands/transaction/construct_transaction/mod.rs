@@ -1,6 +1,7 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 mod delete_account;
+mod transfer_tokens;
 
 #[derive(Debug, Clone, clap::Parser)]
 pub enum CliSkipNextAction {
@@ -104,32 +105,28 @@ impl SelectAction {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select an action that you want to add to the action:
 pub enum ActionSubcommand {
-    #[strum_discriminants(strum(message = "Specify data for transfer tokens"))]
+    #[strum_discriminants(strum(message = "Transfer tokens"))]
     ///Specify data for transfer tokens
-    TransferTokens, //(self::transfer_near_tokens_type::TransferNEARTokensAction),
-    #[strum_discriminants(strum(message = "Specify data to call the function"))]
+    TransferTokens(self::transfer_tokens::TokensCommands),
+    #[strum_discriminants(strum(message = "Call the function"))]
     ///Specify data to call the function
     CallFunction, //(self::call_function_type::CallFunctionAction),
-    #[strum_discriminants(strum(message = "Specify data to stake NEAR Tokens"))]
+    #[strum_discriminants(strum(message = "Stake NEAR Tokens"))]
     ///Specify data to stake NEAR Tokens
     StakeNearTokens, //(self::stake_near_tokens_type::StakeNEARTokensAction),
-    #[strum_discriminants(strum(message = "Specify data to create a sub-account"))]
+    #[strum_discriminants(strum(message = "Create a sub-account"))]
     ///Specify data to create a sub-account
     CreateSubAccount, //(self::create_account_type::CreateAccountAction),
-    #[strum_discriminants(strum(message = "Specify data to delete an account"))]
+    #[strum_discriminants(strum(message = "Delete an account"))]
     ///Specify data to delete an account
     DeleteAccount(self::delete_account::DeleteAccountAction),
-    #[strum_discriminants(strum(
-        message = "Specify the data to add an access key to the account"
-    ))]
+    #[strum_discriminants(strum(message = "Add an access key to the account"))]
     ///Specify the data to add an access key to the account
     AddAccessKey, //(self::add_access_key_mode::AddAccessKeyMode),
-    #[strum_discriminants(strum(
-        message = "Specify the data to delete the access key to the account"
-    ))]
+    #[strum_discriminants(strum(message = "Delete the access key to the account"))]
     ///Specify the data to delete the access key to the account
     DeleteAccessKey, //(self::delete_access_key_type::DeleteAccessKeyAction),
-    #[strum_discriminants(strum(message = "Specify the details to deploy the contract code"))]
+    #[strum_discriminants(strum(message = "Deploy the contract code"))]
     ///Specify the details to deploy the contract code
     DeployContract, //(self::add_contract_code_type::ContractFile),
 }
@@ -141,11 +138,11 @@ impl ActionSubcommand {
         // network_connection_config: Option<crate::common::ConnectionConfig>,
     ) -> crate::CliResult {
         match self {
-            // ActionSubcommand::TransferNearTokens(args_transfer) => {
-            //     args_transfer
-            //         .process(prepopulated_unsigned_transaction, network_connection_config)
-            //         .await
-            // }
+            ActionSubcommand::TransferTokens(args_transfer) => {
+                args_transfer
+                    .process(prepopulated_unsigned_transaction)
+                    .await
+            }
             // ActionSubcommand::CallFunction(args_function) => {
             //     args_function
             //         .process(prepopulated_unsigned_transaction, network_connection_config)
