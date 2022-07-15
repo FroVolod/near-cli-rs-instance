@@ -107,7 +107,7 @@ impl SelectAction {
 pub enum ActionSubcommand {
     #[strum_discriminants(strum(message = "Transfer tokens"))]
     ///Specify data for transfer tokens
-    TransferTokens(self::transfer_tokens::TokensCommands),
+    TransferTokens(self::transfer_tokens::SendNearCommand),
     #[strum_discriminants(strum(message = "Call the function"))]
     ///Specify data to call the function
     CallFunction, //(self::call_function_type::CallFunctionAction),
