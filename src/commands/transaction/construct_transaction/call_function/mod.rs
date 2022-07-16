@@ -169,7 +169,7 @@ impl CallFunctionAction {
     #[async_recursion(?Send)]
     pub async fn process(
         &self,
-        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
+        mut prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         let action = near_primitives::transaction::Action::FunctionCall(
             near_primitives::transaction::FunctionCallAction {
@@ -179,17 +179,16 @@ impl CallFunctionAction {
                 deposit: self.deposit.clone(),
             },
         );
-        let mut actions = prepopulated_unsigned_transaction.actions.clone();
-        actions.push(action);
-        let unsigned_transaction = near_primitives::transaction::Transaction {
-            actions,
-            ..prepopulated_unsigned_transaction
-        };
+        prepopulated_unsigned_transaction.actions.push(action);
         match *self.next_action.clone() {
             super::NextAction::AddAction(select_action) => {
-                select_action.process(unsigned_transaction).await
+                select_action
+                    .process(prepopulated_unsigned_transaction)
+                    .await
             }
-            super::NextAction::Skip(skip_action) => skip_action.process(unsigned_transaction).await,
+            super::NextAction::Skip(skip_action) => {
+                skip_action.process(prepopulated_unsigned_transaction).await
+            }
         }
     }
 }

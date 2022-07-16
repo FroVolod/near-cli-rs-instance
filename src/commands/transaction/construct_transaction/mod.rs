@@ -2,6 +2,7 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 mod call_function;
 mod delete_account;
+mod stake_near_tokens;
 mod transfer_tokens;
 
 #[derive(Debug, Clone, clap::Parser)]
@@ -114,7 +115,7 @@ pub enum ActionSubcommand {
     CallFunction(self::call_function::CallFunctionAction),
     #[strum_discriminants(strum(message = "Stake NEAR Tokens"))]
     ///Specify data to stake NEAR Tokens
-    StakeNearTokens, //(self::stake_near_tokens_type::StakeNEARTokensAction),
+    StakeNearTokens(self::stake_near_tokens::StakeNEARTokensAction),
     #[strum_discriminants(strum(message = "Create a sub-account"))]
     ///Specify data to create a sub-account
     CreateSubAccount, //(self::create_account_type::CreateAccountAction),
@@ -149,11 +150,9 @@ impl ActionSubcommand {
                     .process(prepopulated_unsigned_transaction)
                     .await
             }
-            // ActionSubcommand::StakeNearTokens(args_stake) => {
-            //     args_stake
-            //         .process(prepopulated_unsigned_transaction, network_connection_config)
-            //         .await
-            // }
+            ActionSubcommand::StakeNearTokens(args_stake) => {
+                args_stake.process(prepopulated_unsigned_transaction).await
+            }
             // ActionSubcommand::CreateAccount(args_create_account) => {
             //     args_create_account
             //         .process(prepopulated_unsigned_transaction, network_connection_config)
