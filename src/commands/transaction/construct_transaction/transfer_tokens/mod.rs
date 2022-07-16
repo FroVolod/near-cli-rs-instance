@@ -3,11 +3,6 @@ use dialoguer::Input;
 
 ///Create transfer NEAR tokens
 #[derive(Debug, Default, Clone, clap::Parser)]
-#[clap(
-    setting(clap::AppSettings::ColoredHelp),
-    setting(clap::AppSettings::DisableHelpSubcommand),
-    // setting(clap::AppSettings::VersionlessSubcommands)
-)]
 pub struct CliSendNearCommand {
     ///Enter an amount to transfer
     amount_in_near: Option<crate::common::NearBalance>,

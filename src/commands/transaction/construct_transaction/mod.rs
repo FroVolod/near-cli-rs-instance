@@ -1,5 +1,6 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
+mod call_function;
 mod delete_account;
 mod transfer_tokens;
 
@@ -110,7 +111,7 @@ pub enum ActionSubcommand {
     TransferTokens(self::transfer_tokens::SendNearCommand),
     #[strum_discriminants(strum(message = "Call the function"))]
     ///Specify data to call the function
-    CallFunction, //(self::call_function_type::CallFunctionAction),
+    CallFunction(self::call_function::CallFunctionAction),
     #[strum_discriminants(strum(message = "Stake NEAR Tokens"))]
     ///Specify data to stake NEAR Tokens
     StakeNearTokens, //(self::stake_near_tokens_type::StakeNEARTokensAction),
@@ -143,11 +144,11 @@ impl ActionSubcommand {
                     .process(prepopulated_unsigned_transaction)
                     .await
             }
-            // ActionSubcommand::CallFunction(args_function) => {
-            //     args_function
-            //         .process(prepopulated_unsigned_transaction, network_connection_config)
-            //         .await
-            // }
+            ActionSubcommand::CallFunction(args_function) => {
+                args_function
+                    .process(prepopulated_unsigned_transaction)
+                    .await
+            }
             // ActionSubcommand::StakeNearTokens(args_stake) => {
             //     args_stake
             //         .process(prepopulated_unsigned_transaction, network_connection_config)
