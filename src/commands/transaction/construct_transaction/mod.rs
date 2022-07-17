@@ -11,18 +11,6 @@ pub enum CliSkipNextAction {
     Skip(CliSkipAction),
 }
 
-#[derive(Debug, Clone, EnumDiscriminants, interactive_clap::InteractiveClap)]
-#[strum_discriminants(derive(EnumMessage, EnumIter))]
-///Select an action that you want to add to the action:
-pub enum NextAction {
-    #[strum_discriminants(strum(message = "Select a new action"))]
-    /// Choose next action
-    AddAction(SelectAction),
-    #[strum_discriminants(strum(message = "Skip adding a new action"))]
-    /// Go to transaction signing
-    Skip(SkipAction),
-}
-
 impl CliSkipNextAction {
     pub fn to_cli_args(&self) -> std::collections::VecDeque<String> {
         match self {
@@ -36,11 +24,31 @@ impl CliSkipNextAction {
     }
 }
 
+#[derive(Debug, Clone, EnumDiscriminants, interactive_clap::InteractiveClap)]
+#[strum_discriminants(derive(EnumMessage, EnumIter))]
+///Select an action that you want to add to the action:
+pub enum NextAction {
+    #[strum_discriminants(strum(message = "Select a new action"))]
+    /// Choose next action
+    AddAction(SelectAction),
+    #[strum_discriminants(strum(message = "Skip adding a new action"))]
+    /// Go to transaction signing
+    Skip(SkipAction),
+}
+
 impl From<NextAction> for CliSkipNextAction {
     fn from(next_action: NextAction) -> Self {
         match next_action {
             NextAction::AddAction(_select_action) => Self::Skip(CliSkipAction { network: None }),
             NextAction::Skip(skip_action) => Self::Skip(skip_action.into()),
+        }
+    }
+}
+
+impl From<CliSkipNextAction> for CliNextAction {
+    fn from(cli_skip_next_action: CliSkipNextAction) -> Self {
+        match cli_skip_next_action {
+            CliSkipNextAction::Skip(skip_action) => Self::Skip(skip_action),
         }
     }
 }
@@ -86,6 +94,51 @@ impl NextAction {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct BoxNextAction {
+    inner: Box<NextAction>,
+}
+
+impl interactive_clap::ToCli for BoxNextAction {
+    type CliVariant = CliSkipNextAction;
+}
+
+impl From<BoxNextAction> for CliSkipNextAction {
+    fn from(box_next_action: BoxNextAction) -> Self {
+        Self::from(*box_next_action.inner)
+    }
+}
+
+impl BoxNextAction {
+    fn choose_variant(context: ()) -> color_eyre::eyre::Result<Self> {
+        Ok(Self {
+            inner: Box::new(NextAction::choose_variant(context)?),
+        })
+    }
+}
+
+impl BoxNextAction {
+    pub fn from_cli(
+        optional_clap_variant: Option<<BoxNextAction as interactive_clap::ToCli>::CliVariant>,
+        context: (),
+    ) -> color_eyre::eyre::Result<Self> {
+        //     let skip_next_action: super::NextAction =
+        // match optional_clap_variant.and_then(|clap_variant| clap_variant.next_action) {
+        //     Some(cli_skip_action) => {
+        //         super::NextAction::from_cli_skip_next_action(cli_skip_action, context)?
+        //     }
+        //     None => super::NextAction::choose_variant(context)?,
+        // };
+
+        Ok(Self {
+            inner: Box::new(NextAction::from_cli(
+                optional_clap_variant.map(Into::into),
+                context,
+            )?),
+        })
+    }
+}
+
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct SelectAction {
     #[interactive_clap(subcommand)]
@@ -115,7 +168,7 @@ pub enum ActionSubcommand {
     CallFunction(self::call_function::CallFunctionAction),
     #[strum_discriminants(strum(message = "Stake NEAR Tokens"))]
     ///Specify data to stake NEAR Tokens
-    StakeNearTokens(self::stake_near_tokens::StakeNEARTokensAction),
+    StakeNearTokens(self::stake_near_tokens::StakeNearTokensAction),
     #[strum_discriminants(strum(message = "Create a sub-account"))]
     ///Specify data to create a sub-account
     CreateSubAccount, //(self::create_account_type::CreateAccountAction),

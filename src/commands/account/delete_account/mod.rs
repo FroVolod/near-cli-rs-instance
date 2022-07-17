@@ -3,8 +3,8 @@ pub struct DeleteAccount {
     ///What Account ID to be deleted
     account_id: crate::types::account_id::AccountId,
     #[interactive_clap(named_arg)]
-    ///Specify a beneficiary
-    pub beneficiary: BeneficiaryAccount,
+    ///Enter the beneficiary ID to delete this account ID
+    beneficiary: BeneficiaryAccount,
 }
 
 impl DeleteAccount {
@@ -18,7 +18,7 @@ impl DeleteAccount {
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct BeneficiaryAccount {
     ///Specify a beneficiary
-    pub beneficiary_account_id: crate::types::account_id::AccountId,
+    beneficiary_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(named_arg)]
     ///Select online mode
     network: crate::network_for_transaction::NetworkForTransactionArgs,

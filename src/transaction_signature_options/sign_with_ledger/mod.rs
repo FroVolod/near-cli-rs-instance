@@ -7,9 +7,9 @@ pub struct SignLedger {
     #[interactive_clap(long)]
     #[interactive_clap(skip_default_from_cli_arg)]
     #[interactive_clap(skip_default_input_arg)]
-    pub seed_phrase_hd_path: crate::types::slip10::BIP32Path,
+    seed_phrase_hd_path: crate::types::slip10::BIP32Path,
     #[interactive_clap(skip)]
-    pub signer_public_key: crate::types::public_key::PublicKey,
+    signer_public_key: crate::types::public_key::PublicKey,
     #[interactive_clap(long)]
     #[interactive_clap(skip_default_from_cli_arg)]
     #[interactive_clap(skip_default_input_arg)]
@@ -19,13 +19,13 @@ pub struct SignLedger {
     #[interactive_clap(skip_default_input_arg)]
     block_hash: Option<String>,
     #[interactive_clap(subcommand)]
-    pub submit: super::Submit,
+    submit: super::Submit,
 }
 
 impl SignLedger {
     pub fn from_cli(
         optional_clap_variant: Option<<SignLedger as interactive_clap::ToCli>::CliVariant>,
-        context: (),
+        _context: (),
     ) -> color_eyre::eyre::Result<Self> {
         let seed_phrase_hd_path = match optional_clap_variant
             .clone()

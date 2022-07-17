@@ -10,7 +10,7 @@ pub struct AddKeyCommand {
     ///Which account should You add an access key to?
     owner_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(subcommand)]
-    pub permission: AccessKeyPermission,
+    permission: AccessKeyPermission,
 }
 
 impl AddKeyCommand {

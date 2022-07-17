@@ -12,9 +12,9 @@ pub struct SignKeychain {
     #[interactive_clap(long)]
     #[interactive_clap(skip_default_from_cli_arg)]
     #[interactive_clap(skip_default_input_arg)]
-    pub block_hash: Option<String>,
+    block_hash: Option<String>,
     #[interactive_clap(subcommand)]
-    pub submit: super::Submit,
+    submit: super::Submit,
 }
 
 #[derive(Debug, Deserialize)]

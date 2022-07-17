@@ -3,7 +3,7 @@ pub struct DeleteKeyCommand {
     ///Which account should You delete the access key for?
     owner_account_id: crate::types::account_id::AccountId,
     ///Enter the public key You wish to delete
-    pub public_key: crate::types::public_key::PublicKey,
+    public_key: crate::types::public_key::PublicKey,
     #[interactive_clap(named_arg)]
     ///Select online mode
     network: crate::network_for_transaction::NetworkForTransactionArgs,

@@ -5,7 +5,7 @@ pub struct SubAccount {
     ///Enter the amount for the subaccount
     initial_balance: crate::common::NearBalance,
     #[interactive_clap(subcommand)]
-    pub access_key_mode: super::add_key::AccessKeyMode,
+    access_key_mode: super::add_key::AccessKeyMode,
 }
 
 impl SubAccount {

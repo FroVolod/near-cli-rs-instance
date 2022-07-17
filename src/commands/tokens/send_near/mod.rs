@@ -1,7 +1,10 @@
+use dialoguer::Input;
+
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct SendNearCommand {
     ///What is the receiver account ID?
     receiver_account_id: crate::types::account_id::AccountId,
+    #[interactive_clap(skip_default_input_arg)]
     ///Enter an amount to transfer
     amount_in_near: crate::common::NearBalance,
     #[interactive_clap(named_arg)]
@@ -10,6 +13,14 @@ pub struct SendNearCommand {
 }
 
 impl SendNearCommand {
+    fn input_amount_in_near(_context: &()) -> color_eyre::eyre::Result<crate::common::NearBalance> {
+        let input_amount: crate::common::NearBalance = Input::new()
+                        .with_prompt("How many NEAR Tokens do you want to transfer? (example: 10NEAR or 0.5near or 10000yoctonear)")
+                        .interact_text()
+                        ?;
+        Ok(input_amount)
+    }
+
     pub async fn process(
         &self,
         owner_account_id: near_primitives::types::AccountId,

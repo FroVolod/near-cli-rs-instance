@@ -3,7 +3,7 @@ use std::str::FromStr;
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct AddAccessWithSeedPhraseAction {
     ///Enter the seed_phrase for this sub-account
-    pub master_seed_phrase: String,
+    master_seed_phrase: String,
     #[interactive_clap(named_arg)]
     ///Select online mode
     network: crate::network_for_transaction::NetworkForTransactionArgs,

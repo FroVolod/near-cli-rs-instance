@@ -28,16 +28,16 @@ pub struct FunctionCallType {
     #[interactive_clap(long)]
     #[interactive_clap(skip_default_from_cli_arg)]
     #[interactive_clap(skip_default_input_arg)]
-    pub allowance: Option<crate::common::NearBalance>,
+    allowance: Option<crate::common::NearBalance>,
     #[interactive_clap(long)]
     ///Enter a receiver to use by this access key to pay for function call gas and transaction fees.
-    pub receiver_account_id: crate::types::account_id::AccountId,
+    receiver_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(long)]
     #[interactive_clap(skip_default_from_cli_arg)]
     #[interactive_clap(skip_default_input_arg)]
-    pub method_names: crate::types::vec_string::VecString,
+    method_names: crate::types::vec_string::VecString,
     #[interactive_clap(subcommand)]
-    pub access_key_mode: super::AccessKeyMode,
+    access_key_mode: super::AccessKeyMode,
 }
 
 impl FunctionCallType {

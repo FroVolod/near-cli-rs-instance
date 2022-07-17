@@ -1,7 +1,7 @@
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct AddAccessKeyAction {
     ///Enter the public key for this account
-    pub public_key: crate::types::public_key::PublicKey,
+    public_key: crate::types::public_key::PublicKey,
     #[interactive_clap(named_arg)]
     ///Select online mode
     network: crate::network_for_transaction::NetworkForTransactionArgs,
