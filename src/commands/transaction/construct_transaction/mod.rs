@@ -3,6 +3,7 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 mod add_access_key;
 mod call_function;
 mod create_subaccount;
+mod delete_access_key;
 mod delete_account;
 mod stake_near_tokens;
 mod transfer_tokens;
@@ -174,7 +175,7 @@ pub enum ActionSubcommand {
     AddAccessKey(self::add_access_key::AddKeyCommand),
     #[strum_discriminants(strum(message = "Delete the access key to the account"))]
     ///Specify the data to delete the access key to the account
-    DeleteAccessKey, //(self::delete_access_key_type::DeleteAccessKeyAction),
+    DeleteAccessKey(self::delete_access_key::DeleteKeyCommand),
     #[strum_discriminants(strum(message = "Deploy the contract code"))]
     ///Specify the details to deploy the contract code
     DeployContract, //(self::add_contract_code_type::ContractFile),
@@ -214,11 +215,11 @@ impl ActionSubcommand {
                     .process(prepopulated_unsigned_transaction)
                     .await
             }
-            // ActionSubcommand::DeleteAccessKey(args_delete_access_key) => {
-            //     args_delete_access_key
-            //         .process(prepopulated_unsigned_transaction, network_connection_config)
-            //         .await
-            // }
+            ActionSubcommand::DeleteAccessKey(args_delete_access_key) => {
+                args_delete_access_key
+                    .process(prepopulated_unsigned_transaction)
+                    .await
+            }
             // ActionSubcommand::AddContractCode(args_contract_file) => {
             //     args_contract_file
             //         .process(prepopulated_unsigned_transaction, network_connection_config)
