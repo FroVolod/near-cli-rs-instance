@@ -1,5 +1,6 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
+mod add_access_key;
 mod call_function;
 mod delete_account;
 mod stake_near_tokens;
@@ -122,14 +123,6 @@ impl BoxNextAction {
         optional_clap_variant: Option<<BoxNextAction as interactive_clap::ToCli>::CliVariant>,
         context: (),
     ) -> color_eyre::eyre::Result<Self> {
-        //     let skip_next_action: super::NextAction =
-        // match optional_clap_variant.and_then(|clap_variant| clap_variant.next_action) {
-        //     Some(cli_skip_action) => {
-        //         super::NextAction::from_cli_skip_next_action(cli_skip_action, context)?
-        //     }
-        //     None => super::NextAction::choose_variant(context)?,
-        // };
-
         Ok(Self {
             inner: Box::new(NextAction::from_cli(
                 optional_clap_variant.map(Into::into),
@@ -177,7 +170,7 @@ pub enum ActionSubcommand {
     DeleteAccount(self::delete_account::DeleteAccountAction),
     #[strum_discriminants(strum(message = "Add an access key to the account"))]
     ///Specify the data to add an access key to the account
-    AddAccessKey, //(self::add_access_key_mode::AddAccessKeyMode),
+    AddAccessKey(self::add_access_key::AddKeyCommand),
     #[strum_discriminants(strum(message = "Delete the access key to the account"))]
     ///Specify the data to delete the access key to the account
     DeleteAccessKey, //(self::delete_access_key_type::DeleteAccessKeyAction),
@@ -190,7 +183,6 @@ impl ActionSubcommand {
     pub async fn process(
         &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
-        // network_connection_config: Option<crate::common::ConnectionConfig>,
     ) -> crate::CliResult {
         match self {
             ActionSubcommand::TransferTokens(args_transfer) => {
@@ -216,11 +208,11 @@ impl ActionSubcommand {
                     .process(prepopulated_unsigned_transaction)
                     .await
             }
-            // ActionSubcommand::AddAccessKey(args_add_access_key) => {
-            //     args_add_access_key
-            //         .process(prepopulated_unsigned_transaction, network_connection_config)
-            //         .await
-            // }
+            ActionSubcommand::AddAccessKey(args_add_key_command) => {
+                args_add_key_command
+                    .process(prepopulated_unsigned_transaction)
+                    .await
+            }
             // ActionSubcommand::DeleteAccessKey(args_delete_access_key) => {
             //     args_delete_access_key
             //         .process(prepopulated_unsigned_transaction, network_connection_config)

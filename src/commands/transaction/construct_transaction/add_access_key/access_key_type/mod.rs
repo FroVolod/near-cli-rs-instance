@@ -1,11 +1,10 @@
-use std::str::FromStr;
-
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
+use std::str::FromStr;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct FullAccessType {
     #[interactive_clap(subcommand)]
-    pub access_key_mode: super::AccessKeyMode,
+    access_key_mode: super::AccessKeyMode,
 }
 
 impl FullAccessType {
