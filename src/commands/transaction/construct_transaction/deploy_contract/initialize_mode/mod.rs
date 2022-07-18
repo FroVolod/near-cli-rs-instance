@@ -1,3 +1,4 @@
+use async_recursion::async_recursion;
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 mod call_function_type;
@@ -36,42 +37,24 @@ impl InitializeMode {
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 pub struct NoInitialize {
-    #[interactive_clap(named_arg)]
-    ///Select online mode
-    network: crate::network_for_transaction::NetworkForTransactionArgs,
+    #[interactive_clap(subcommand)]
+    next_action: super::super::BoxNextAction,
 }
 
 impl NoInitialize {
+    #[async_recursion(?Send)]
     pub async fn process(
         &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
-        match self.network.get_sign_option() {
-            crate::transaction_signature_options::SignWith::SignWithPlaintextPrivateKey(
-                sign_private_key,
-            ) => {
-                sign_private_key
-                    .process(
-                        prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
-                    )
+        match *self.next_action.clone().inner {
+            super::super::NextAction::AddAction(select_action) => {
+                select_action
+                    .process(prepopulated_unsigned_transaction)
                     .await
             }
-            crate::transaction_signature_options::SignWith::SignWithKeychain(sign_keychain) => {
-                sign_keychain
-                    .process(
-                        prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
-                    )
-                    .await
-            }
-            crate::transaction_signature_options::SignWith::SignWithLedger(sign_ledger) => {
-                sign_ledger
-                    .process(
-                        prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
-                    )
-                    .await
+            super::super::NextAction::Skip(skip_action) => {
+                skip_action.process(prepopulated_unsigned_transaction).await
             }
         }
     }

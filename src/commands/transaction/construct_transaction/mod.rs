@@ -5,6 +5,7 @@ mod call_function;
 mod create_subaccount;
 mod delete_access_key;
 mod delete_account;
+mod deploy_contract;
 mod stake_near_tokens;
 mod transfer_tokens;
 
@@ -178,7 +179,7 @@ pub enum ActionSubcommand {
     DeleteAccessKey(self::delete_access_key::DeleteKeyCommand),
     #[strum_discriminants(strum(message = "Deploy the contract code"))]
     ///Specify the details to deploy the contract code
-    DeployContract, //(self::add_contract_code_type::ContractFile),
+    DeployContract(self::deploy_contract::Contract),
 }
 
 impl ActionSubcommand {
@@ -220,12 +221,11 @@ impl ActionSubcommand {
                     .process(prepopulated_unsigned_transaction)
                     .await
             }
-            // ActionSubcommand::AddContractCode(args_contract_file) => {
-            //     args_contract_file
-            //         .process(prepopulated_unsigned_transaction, network_connection_config)
-            //         .await
-            // }
-            _ => todo!(),
+            ActionSubcommand::DeployContract(args_contract_file) => {
+                args_contract_file
+                    .process(prepopulated_unsigned_transaction)
+                    .await
+            }
         }
     }
 }
