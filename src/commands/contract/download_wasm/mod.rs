@@ -14,7 +14,7 @@ pub struct DownloadContract {
 }
 
 impl DownloadContract {
-    fn input_file_path(context: &()) -> color_eyre::eyre::Result<crate::types::path_buf::PathBuf> {
+    fn input_file_path(_context: &()) -> color_eyre::eyre::Result<crate::types::path_buf::PathBuf> {
         println!();
         let input_file_path: String = Input::new()
             .with_prompt("Where to download the contract file?")
