@@ -27,7 +27,7 @@ struct User {
 impl SignKeychain {
     pub fn from_cli(
         optional_clap_variant: Option<<SignKeychain as interactive_clap::ToCli>::CliVariant>,
-        context: (),
+        _context: (),
     ) -> color_eyre::eyre::Result<Self> {
         let submit: super::Submit = match optional_clap_variant
             .clone()
