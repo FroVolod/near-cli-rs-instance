@@ -2,7 +2,7 @@ extern crate dirs;
 
 use serde::Deserialize;
 
-#[derive(Debug, Clone, interactive_clap_derive::InteractiveClap)]
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(skip_default_from_cli)]
 pub struct SignKeychain {
     #[interactive_clap(long)]

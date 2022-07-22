@@ -57,7 +57,7 @@ pub fn input_block_hash() -> color_eyre::eyre::Result<crate::types::crypto_hash:
     ))
 }
 
-#[derive(Debug, EnumDiscriminants, Clone, clap::Parser, interactive_clap_derive::ToCliArgs)]
+#[derive(Debug, EnumDiscriminants, Clone, clap::Parser, interactive_clap::ToCliArgs)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 pub enum Submit {
     #[strum_discriminants(strum(message = "I want to send the transaction to the network"))]

@@ -11,7 +11,7 @@ mod transfer_tokens;
 
 #[derive(Debug, Clone, clap::Parser)]
 pub enum CliSkipNextAction {
-    /// Go to transaction signing
+    ///Go to transaction signing
     Skip(CliSkipAction),
 }
 
@@ -19,10 +19,13 @@ impl CliSkipNextAction {
     pub fn to_cli_args(&self) -> std::collections::VecDeque<String> {
         match self {
             Self::Skip(subcommand) => {
-                // let mut args = ;  it is not implemented now!!!
-                // args.push_front("skip".to_owned());
-                // args
-                subcommand.to_cli_args()
+                // // let mut args = ;  it is not implemented now!!!
+                // // args.push_front("skip".to_owned());
+                // // args
+                // subcommand.to_cli_args()
+                let mut args = subcommand.to_cli_args();
+                args.push_front("skip".to_owned());
+                args
             }
         }
     }

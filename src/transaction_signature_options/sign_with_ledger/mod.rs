@@ -1,7 +1,7 @@
 use dialoguer::Input;
 use near_primitives::borsh::BorshSerialize;
 
-#[derive(Debug, Clone, interactive_clap_derive::InteractiveClap)]
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(skip_default_from_cli)]
 pub struct SignLedger {
     #[interactive_clap(long)]
