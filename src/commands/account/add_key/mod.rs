@@ -6,6 +6,7 @@ mod use_manually_provided_seed_phrase;
 mod use_public_key;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct AddKeyCommand {
     ///Which account should You add an access key to?
     owner_account_id: crate::types::account_id::AccountId,
@@ -14,7 +15,7 @@ pub struct AddKeyCommand {
 }
 
 impl AddKeyCommand {
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         let prepopulated_unsigned_transaction = near_primitives::transaction::Transaction {
             signer_id: self.owner_account_id.clone().into(),
             public_key: near_crypto::PublicKey::empty(near_crypto::KeyType::ED25519),
@@ -26,12 +27,12 @@ impl AddKeyCommand {
         match self.permission.clone() {
             AccessKeyPermission::GrantFullAccess(full_access_type) => {
                 full_access_type
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             AccessKeyPermission::GrantFunctionCallAccess(function_call_type) => {
                 function_call_type
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
         }
@@ -39,6 +40,7 @@ impl AddKeyCommand {
 }
 
 #[derive(Debug, Clone, EnumDiscriminants, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select a permission that you want to add to the access key
 pub enum AccessKeyPermission {
@@ -51,6 +53,7 @@ pub enum AccessKeyPermission {
 }
 
 #[derive(Debug, Clone, EnumDiscriminants, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Add an access key for this account
 pub enum AccessKeyMode {
@@ -70,23 +73,24 @@ pub enum AccessKeyMode {
 impl AccessKeyMode {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         permission: near_primitives::account::AccessKeyPermission,
     ) -> crate::CliResult {
         match self {
             AccessKeyMode::UseManuallyProvidedPublicKey(add_access_key_action) => {
                 add_access_key_action
-                    .process(prepopulated_unsigned_transaction, permission)
+                    .process(config, prepopulated_unsigned_transaction, permission)
                     .await
             }
             AccessKeyMode::AutogenerateNewKeypair(generate_keypair) => {
                 generate_keypair
-                    .process(prepopulated_unsigned_transaction, permission)
+                    .process(config, prepopulated_unsigned_transaction, permission)
                     .await
             }
             AccessKeyMode::UseManuallyProvidedSeedPhrase(add_access_with_seed_phrase_action) => {
                 add_access_with_seed_phrase_action
-                    .process(prepopulated_unsigned_transaction, permission)
+                    .process(config, prepopulated_unsigned_transaction, permission)
                     .await
             }
         }

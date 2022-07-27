@@ -1,6 +1,7 @@
 use dialoguer::Input;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct CallFunctionAction {
     ///What is the name of the function?
     function_name: String,
@@ -20,7 +21,9 @@ pub struct CallFunctionAction {
 }
 
 impl CallFunctionAction {
-    fn input_gas(_context: &()) -> color_eyre::eyre::Result<crate::common::NearGas> {
+    fn input_gas(
+        _context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<crate::common::NearGas> {
         println!();
         let gas: u64 = loop {
             let input_gas: crate::common::NearGas = Input::new()
@@ -39,7 +42,9 @@ impl CallFunctionAction {
         Ok(gas.into())
     }
 
-    fn input_deposit(_context: &()) -> color_eyre::eyre::Result<crate::common::NearBalance> {
+    fn input_deposit(
+        _context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<crate::common::NearBalance> {
         println!();
         let deposit: crate::common::NearBalance = Input::new()
             .with_prompt(
@@ -52,6 +57,7 @@ impl CallFunctionAction {
 
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         let action = near_primitives::transaction::Action::FunctionCall(
@@ -75,7 +81,7 @@ impl CallFunctionAction {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -83,7 +89,7 @@ impl CallFunctionAction {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -91,7 +97,7 @@ impl CallFunctionAction {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }

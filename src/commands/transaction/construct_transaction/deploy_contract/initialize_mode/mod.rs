@@ -4,6 +4,7 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 mod call_function_type;
 
 #[derive(Debug, Clone, EnumDiscriminants, interactive_clap_derive::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select the need for initialization
 pub enum InitializeMode {
@@ -18,17 +19,18 @@ pub enum InitializeMode {
 impl InitializeMode {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         match self {
             InitializeMode::Initialize(call_function_action) => {
                 call_function_action
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             InitializeMode::NoInitialize(no_initialize) => {
                 no_initialize
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
         }
@@ -36,6 +38,7 @@ impl InitializeMode {
 }
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct NoInitialize {
     #[interactive_clap(subcommand)]
     next_action: super::super::BoxNextAction,
@@ -45,16 +48,19 @@ impl NoInitialize {
     #[async_recursion(?Send)]
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         match *self.next_action.clone().inner {
             super::super::NextAction::AddAction(select_action) => {
                 select_action
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             super::super::NextAction::Skip(skip_action) => {
-                skip_action.process(prepopulated_unsigned_transaction).await
+                skip_action
+                    .process(config, prepopulated_unsigned_transaction)
+                    .await
             }
         }
     }

@@ -9,54 +9,68 @@ mod list_keys;
 mod view_account_summary;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct AccountCommands {
     #[interactive_clap(subcommand)]
     account_actions: AccountActions,
 }
 
 impl AccountCommands {
-    pub async fn process(&self) -> crate::CliResult {
-        self.account_actions.process().await
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
+        self.account_actions.process(config).await
     }
 }
 
 #[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
-///Сhoose action for account
+/// What do you want to do with an account?
 pub enum AccountActions {
-    #[strum_discriminants(strum(message = "View properties for an account"))]
-    ///View properties for an account
+    #[strum_discriminants(strum(
+        message = "view-account-summary - View properties for an account"
+    ))]
+    /// View properties for an account
     ViewAccountSummary(self::view_account_summary::ViewAccountSummary),
-    #[strum_discriminants(strum(message = "Create a new sub-account"))]
-    ///Create a new sub-account
-    CreateSubaccount(self::create_subaccount::SubAccount),
-    #[strum_discriminants(strum(message = "Delete this account"))]
-    ///Delete this account
-    DeleteAccount(self::delete_account::DeleteAccount),
-    #[strum_discriminants(strum(message = "View a list of keys for an account"))]
-    ///View a list of keys for an account
-    ListKeys(self::list_keys::ViewListKeys),
-    #[strum_discriminants(strum(message = "Add an access key for this account"))]
-    ///Add an access key for this account
-    AddKey(self::add_key::AddKeyCommand),
-    #[strum_discriminants(strum(message = "Delete an access key for this account"))]
-    ///Delete an access key for this account
-    DeleteKey(self::delete_key::DeleteKeyCommand),
-    #[strum_discriminants(strum(message = "Login with wallet authorization"))]
-    ///Use these to login with wallet authorization
+    #[strum_discriminants(strum(
+        message = "login                - Log in with NEAR Wallet authorization"
+    ))]
+    /// Log in with NEAR Wallet
     ImportAccount(self::import_account::Login),
+    #[strum_discriminants(strum(message = "create-subaccount    - Create a new sub-account"))]
+    /// Create a new sub-account
+    CreateSubaccount(self::create_subaccount::SubAccount),
+    #[strum_discriminants(strum(message = "delete-account       - Delete an account"))]
+    /// Delete an account
+    DeleteAccount(self::delete_account::DeleteAccount),
+    #[strum_discriminants(strum(
+        message = "list-keys            - View a list of access keys of an account"
+    ))]
+    /// View a list of access keys of an account
+    ListKeys(self::list_keys::ViewListKeys),
+    #[strum_discriminants(strum(
+        message = "add-key              - Add an access key to an account"
+    ))]
+    /// Add an access key to an account
+    AddKey(self::add_key::AddKeyCommand),
+    #[strum_discriminants(strum(
+        message = "delete-key           - Delete an access key from an account"
+    ))]
+    /// Delete an access key from an account
+    DeleteKey(self::delete_key::DeleteKeyCommand),
 }
 
 impl AccountActions {
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         match self {
-            Self::ViewAccountSummary(view_account_command) => view_account_command.process().await,
-            Self::ListKeys(view_list_keys) => view_list_keys.process().await,
-            Self::DeleteAccount(delete_account) => delete_account.process().await,
-            Self::CreateSubaccount(sub_account) => sub_account.process().await,
-            Self::AddKey(add_key_command) => add_key_command.process().await,
-            Self::DeleteKey(delete_key_command) => delete_key_command.process().await,
-            Self::ImportAccount(login) => login.process().await,
+            Self::ViewAccountSummary(view_account_command) => {
+                view_account_command.process(config).await
+            }
+            Self::ListKeys(view_list_keys) => view_list_keys.process(config).await,
+            Self::DeleteAccount(delete_account) => delete_account.process(config).await,
+            Self::CreateSubaccount(sub_account) => sub_account.process(config).await,
+            Self::AddKey(add_key_command) => add_key_command.process(config).await,
+            Self::DeleteKey(delete_key_command) => delete_key_command.process(config).await,
+            Self::ImportAccount(login) => login.process(config).await,
         }
     }
 }

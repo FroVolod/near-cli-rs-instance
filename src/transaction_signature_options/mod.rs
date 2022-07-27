@@ -6,6 +6,7 @@ pub mod sign_with_ledger;
 pub mod sign_with_private_key;
 
 #[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select a tool for signing the transaction
 pub enum SignWith {

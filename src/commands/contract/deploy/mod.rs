@@ -1,6 +1,7 @@
 mod initialize_mode;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct Contract {
     ///What is the contract account ID?
     account_id: crate::types::account_id::AccountId,
@@ -10,12 +11,15 @@ pub struct Contract {
 }
 
 impl Contract {
-    pub async fn process(&self) -> crate::CliResult {
-        self.use_file.process(self.account_id.clone().into()).await
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
+        self.use_file
+            .process(config, self.account_id.clone().into())
+            .await
     }
 }
 
 #[derive(Debug, Clone, interactive_clap_derive::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct ContractFile {
     ///What is a file location of the contract?
     pub file_path: crate::types::path_buf::PathBuf,
@@ -24,7 +28,11 @@ pub struct ContractFile {
 }
 
 impl ContractFile {
-    pub async fn process(&self, account_id: near_primitives::types::AccountId) -> crate::CliResult {
+    pub async fn process(
+        &self,
+        config: crate::config::Config,
+        account_id: near_primitives::types::AccountId,
+    ) -> crate::CliResult {
         let code = std::fs::read(&self.file_path.0.clone()).map_err(|err| {
             color_eyre::Report::msg(format!(
                 "Failed to open or read the file: {:?}.\nError: {:?}",
@@ -43,7 +51,7 @@ impl ContractFile {
             )],
         };
         self.initialize
-            .process(prepopulated_unsigned_transaction)
+            .process(config, prepopulated_unsigned_transaction)
             .await
     }
 }

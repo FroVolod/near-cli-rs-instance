@@ -1,4 +1,5 @@
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct DeleteAccount {
     ///What Account ID to be deleted
     account_id: crate::types::account_id::AccountId,
@@ -8,14 +9,15 @@ pub struct DeleteAccount {
 }
 
 impl DeleteAccount {
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         self.beneficiary
-            .process(self.account_id.clone().into())
+            .process(config, self.account_id.clone().into())
             .await
     }
 }
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct BeneficiaryAccount {
     ///Specify a beneficiary
     beneficiary_account_id: crate::types::account_id::AccountId,
@@ -25,7 +27,11 @@ pub struct BeneficiaryAccount {
 }
 
 impl BeneficiaryAccount {
-    pub async fn process(&self, account_id: near_primitives::types::AccountId) -> crate::CliResult {
+    pub async fn process(
+        &self,
+        config: crate::config::Config,
+        account_id: near_primitives::types::AccountId,
+    ) -> crate::CliResult {
         let beneficiary_id: near_primitives::types::AccountId =
             self.beneficiary_account_id.clone().into();
         let prepopulated_unsigned_transaction = near_primitives::transaction::Transaction {
@@ -46,7 +52,7 @@ impl BeneficiaryAccount {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -54,7 +60,7 @@ impl BeneficiaryAccount {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -62,7 +68,7 @@ impl BeneficiaryAccount {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }

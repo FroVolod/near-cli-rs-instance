@@ -1,4 +1,5 @@
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct ViewListKeys {
     ///What Account ID do you need to view?
     account_id: crate::types::account_id::AccountId,
@@ -8,10 +9,10 @@ pub struct ViewListKeys {
 }
 
 impl ViewListKeys {
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         crate::common::display_access_key_list(
             self.account_id.clone().into(),
-            &self.network.get_connection_config(),
+            &self.network.get_connection_config(config),
             self.network.get_block_ref(),
         )
         .await?;

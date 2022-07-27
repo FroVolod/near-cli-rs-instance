@@ -1,6 +1,7 @@
 use serde_json::json;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct ViewFtBalance {
     ///What is the ft-contract account ID?
     ft_contract_account_id: crate::types::account_id::AccountId,
@@ -12,6 +13,7 @@ pub struct ViewFtBalance {
 impl ViewFtBalance {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
         let method_name = "ft_balance_of".to_string();
@@ -21,7 +23,7 @@ impl ViewFtBalance {
         .to_string()
         .into_bytes();
         let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(
-            self.network.get_connection_config().rpc_url(),
+            self.network.get_connection_config(config).rpc_url(),
         )
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: self.network.get_block_ref(),

@@ -2,6 +2,7 @@ use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use std::str::FromStr;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct FullAccessType {
     #[interactive_clap(subcommand)]
     access_key_mode: super::AccessKeyMode,
@@ -10,10 +11,12 @@ pub struct FullAccessType {
 impl FullAccessType {
     pub async fn process(
         self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         self.access_key_mode
             .process(
+                config,
                 prepopulated_unsigned_transaction,
                 near_primitives::account::AccessKeyPermission::FullAccess,
             )
@@ -22,6 +25,7 @@ impl FullAccessType {
 }
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[interactive_clap(skip_default_from_cli)]
 pub struct FunctionCallType {
     #[interactive_clap(long)]
@@ -42,7 +46,7 @@ pub struct FunctionCallType {
 impl FunctionCallType {
     pub fn from_cli(
         optional_clap_variant: Option<<FunctionCallType as interactive_clap::ToCli>::CliVariant>,
-        context: (),
+        context: crate::GlobalContext,
     ) -> color_eyre::eyre::Result<Self> {
         let allowance: Option<crate::common::NearBalance> = match optional_clap_variant
             .clone()
@@ -145,6 +149,7 @@ impl FunctionCallType {
 
     pub async fn process(
         self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         let permission = near_primitives::account::AccessKeyPermission::FunctionCall(
@@ -160,7 +165,7 @@ impl FunctionCallType {
             },
         );
         self.access_key_mode
-            .process(prepopulated_unsigned_transaction, permission)
+            .process(config, prepopulated_unsigned_transaction, permission)
             .await
     }
 }

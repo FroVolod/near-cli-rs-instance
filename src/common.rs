@@ -1187,7 +1187,7 @@ pub fn print_transaction_status(
 }
 
 pub async fn save_access_key_to_keychain(
-    network_connection_config: Option<crate::common::ConnectionConfig>,
+    network_connection_config: Option<&crate::common::ConnectionConfig>,
     key_pair_properties: crate::common::KeyPairProperties,
     account_id: &str,
 ) -> crate::CliResult {

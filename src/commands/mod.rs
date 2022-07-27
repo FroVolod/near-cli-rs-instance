@@ -6,38 +6,35 @@ mod tokens;
 mod transaction;
 
 #[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
-///Choose action
+/// What are you up to? (select one of the options with the up-down arrows on your keyboard and press Enter)
 pub enum TopLevelCommand {
-    #[strum_discriminants(strum(
-        message = "View account summary, create subaccount, delete account, list keys, add key, delete key, import account"
-    ))]
-    ///View account summary, create subaccount, delete account, list keys, add key, delete key, import account
+    #[strum_discriminants(strum(message = "account     - Manage accounts"))]
+    /// View account summary, create subaccount, delete account, list keys, add key, delete key, import account
     Account(self::account::AccountCommands),
     #[strum_discriminants(strum(
-        message = "Use this for token actions: send near, send ft, send nft, view near balance, view ft balance, view nft balance"
+        message = "tokens      - Manage token assets such as NEAR, FT, NFT"
     ))]
-    ///Use this for token actions: send near, send ft, send nft, view near balance, view ft balance, view nft balance
+    /// Use this for token actions: send or view balances of NEAR, FT, or NFT
     Tokens(self::tokens::TokensCommands),
     #[strum_discriminants(strum(
-        message = "Use this for contract actions: call function, deploy, download wasm, inspect storage"
+        message = "contract    - Manage smart-contracts: deploy code, call functions"
     ))]
-    ///Use this for contract actions: call function, deploy, download wasm, inspect storage
+    /// Use this for contract actions: call function, deploy, download wasm, inspect storage
     Contract(self::contract::ContractCommands),
-    #[strum_discriminants(strum(
-        message = "Use this to construct transactions or view the status of a transaction."
-    ))]
-    ///Use this to construct transactions or view the status of a transaction.
+    #[strum_discriminants(strum(message = "transaction - Operate transactions"))]
+    /// Use this to construct transactions or view a transaction status.
     Transaction(self::transaction::TransactionCommands),
 }
 
 impl TopLevelCommand {
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         match self {
-            Self::Tokens(tokens_commands) => tokens_commands.process().await,
-            Self::Account(account_commands) => account_commands.process().await,
-            Self::Contract(contract_commands) => contract_commands.process().await,
-            Self::Transaction(transaction_commands) => transaction_commands.process().await,
+            Self::Tokens(tokens_commands) => tokens_commands.process(config).await,
+            Self::Account(account_commands) => account_commands.process(config).await,
+            Self::Contract(contract_commands) => contract_commands.process(config).await,
+            Self::Transaction(transaction_commands) => transaction_commands.process(config).await,
         }
     }
 }

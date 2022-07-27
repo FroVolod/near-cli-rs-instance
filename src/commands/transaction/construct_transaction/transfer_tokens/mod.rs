@@ -2,6 +2,7 @@ use async_recursion::async_recursion;
 use dialoguer::Input;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct SendNearCommand {
     #[interactive_clap(skip_default_input_arg)]
     ///Enter an amount to transfer
@@ -11,7 +12,9 @@ pub struct SendNearCommand {
 }
 
 impl SendNearCommand {
-    fn input_amount_in_near(_context: &()) -> color_eyre::eyre::Result<crate::common::NearBalance> {
+    fn input_amount_in_near(
+        _context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<crate::common::NearBalance> {
         let input_amount: crate::common::NearBalance = Input::new()
                         .with_prompt("How many NEAR Tokens do you want to transfer? (example: 10NEAR or 0.5near or 10000yoctonear)")
                         .interact_text()
@@ -22,6 +25,7 @@ impl SendNearCommand {
     #[async_recursion(?Send)]
     pub async fn process(
         &self,
+        config: crate::config::Config,
         mut prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         let action = near_primitives::transaction::Action::Transfer(
@@ -33,11 +37,13 @@ impl SendNearCommand {
         match *self.next_action.clone().inner {
             super::NextAction::AddAction(select_action) => {
                 select_action
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             super::NextAction::Skip(skip_action) => {
-                skip_action.process(prepopulated_unsigned_transaction).await
+                skip_action
+                    .process(config, prepopulated_unsigned_transaction)
+                    .await
             }
         }
     }
