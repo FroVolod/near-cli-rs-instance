@@ -32,6 +32,7 @@ impl CliSkipNextAction {
 }
 
 #[derive(Debug, Clone, EnumDiscriminants, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select an action that you want to add to the action:
 pub enum NextAction {
@@ -63,7 +64,7 @@ impl From<CliSkipNextAction> for CliNextAction {
 impl NextAction {
     pub fn from_cli_skip_next_action(
         item: CliSkipNextAction,
-        context: (),
+        context: crate::GlobalContext,
     ) -> color_eyre::eyre::Result<Self> {
         match item {
             CliSkipNextAction::Skip(cli_skip_action) => {
@@ -86,16 +87,19 @@ impl NextAction {
 impl NextAction {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         match self {
             NextAction::AddAction(select_action) => {
                 select_action
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             NextAction::Skip(skip_action) => {
-                skip_action.process(prepopulated_unsigned_transaction).await
+                skip_action
+                    .process(config, prepopulated_unsigned_transaction)
+                    .await
             }
         }
     }
@@ -117,7 +121,7 @@ impl From<BoxNextAction> for CliSkipNextAction {
 }
 
 impl BoxNextAction {
-    fn choose_variant(context: ()) -> color_eyre::eyre::Result<Self> {
+    fn choose_variant(context: crate::GlobalContext) -> color_eyre::eyre::Result<Self> {
         Ok(Self {
             inner: Box::new(NextAction::choose_variant(context)?),
         })
@@ -127,7 +131,7 @@ impl BoxNextAction {
 impl BoxNextAction {
     pub fn from_cli(
         optional_clap_variant: Option<<BoxNextAction as interactive_clap::ToCli>::CliVariant>,
-        context: (),
+        context: crate::GlobalContext,
     ) -> color_eyre::eyre::Result<Self> {
         Ok(Self {
             inner: Box::new(NextAction::from_cli(
@@ -139,6 +143,7 @@ impl BoxNextAction {
 }
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct SelectAction {
     #[interactive_clap(subcommand)]
     transaction_subcommand: ActionSubcommand,
@@ -147,15 +152,17 @@ pub struct SelectAction {
 impl SelectAction {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         self.transaction_subcommand
-            .process(prepopulated_unsigned_transaction)
+            .process(config, prepopulated_unsigned_transaction)
             .await
     }
 }
 
 #[derive(Debug, Clone, EnumDiscriminants, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select an action that you want to add to the action:
 pub enum ActionSubcommand {
@@ -188,45 +195,48 @@ pub enum ActionSubcommand {
 impl ActionSubcommand {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         match self {
             ActionSubcommand::TransferTokens(args_transfer) => {
                 args_transfer
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             ActionSubcommand::CallFunction(args_function) => {
                 args_function
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             ActionSubcommand::StakeNearTokens(args_stake) => {
-                args_stake.process(prepopulated_unsigned_transaction).await
+                args_stake
+                    .process(config, prepopulated_unsigned_transaction)
+                    .await
             }
             ActionSubcommand::CreateSubAccount(args_create_account) => {
                 args_create_account
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             ActionSubcommand::DeleteAccount(args_delete_account) => {
                 args_delete_account
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             ActionSubcommand::AddAccessKey(args_add_key_command) => {
                 args_add_key_command
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             ActionSubcommand::DeleteAccessKey(args_delete_access_key) => {
                 args_delete_access_key
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             ActionSubcommand::DeployContract(args_contract_file) => {
                 args_contract_file
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
         }
@@ -234,6 +244,7 @@ impl ActionSubcommand {
 }
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct SkipAction {
     #[interactive_clap(named_arg)]
     ///Select online mode
@@ -252,6 +263,7 @@ pub struct SkipAction {
 impl SkipAction {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         match self.network.get_sign_option() {
@@ -261,7 +273,7 @@ impl SkipAction {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -269,7 +281,7 @@ impl SkipAction {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -277,7 +289,7 @@ impl SkipAction {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }

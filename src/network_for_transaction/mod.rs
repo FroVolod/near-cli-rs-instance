@@ -1,4 +1,5 @@
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct NetworkForTransactionArgs {
     ///What is the name of the network
     network_name: String,
@@ -7,7 +8,10 @@ pub struct NetworkForTransactionArgs {
 }
 
 impl NetworkForTransactionArgs {
-    pub fn get_connection_config(&self) -> crate::common::ConnectionConfig {
+    pub fn get_connection_config(
+        &self,
+        config: crate::config::Config,
+    ) -> crate::common::ConnectionConfig {
         match self.network_name.as_str() {
             "testnet" => crate::common::ConnectionConfig::Testnet,
             "mainnet" => crate::common::ConnectionConfig::Mainnet,

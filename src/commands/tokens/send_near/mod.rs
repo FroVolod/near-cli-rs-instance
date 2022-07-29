@@ -1,6 +1,7 @@
 use dialoguer::Input;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct SendNearCommand {
     ///What is the receiver account ID?
     receiver_account_id: crate::types::account_id::AccountId,
@@ -13,7 +14,9 @@ pub struct SendNearCommand {
 }
 
 impl SendNearCommand {
-    fn input_amount_in_near(_context: &()) -> color_eyre::eyre::Result<crate::common::NearBalance> {
+    fn input_amount_in_near(
+        _context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<crate::common::NearBalance> {
         let input_amount: crate::common::NearBalance = Input::new()
                         .with_prompt("How many NEAR Tokens do you want to transfer? (example: 10NEAR or 0.5near or 10000yoctonear)")
                         .interact_text()
@@ -23,6 +26,7 @@ impl SendNearCommand {
 
     pub async fn process(
         &self,
+        config: crate::config::Config,
         owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
         let prepopulated_unsigned_transaction = near_primitives::transaction::Transaction {
@@ -45,7 +49,7 @@ impl SendNearCommand {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -53,7 +57,7 @@ impl SendNearCommand {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -61,7 +65,7 @@ impl SendNearCommand {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }

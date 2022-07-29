@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct TransactionInfo {
     ///Enter the hash of the transaction you need to view
     transaction_hash: String,
@@ -11,7 +12,7 @@ pub struct TransactionInfo {
 }
 
 impl TransactionInfo {
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         let connection_config = match self.network_name.as_str() {
             "testnet" => crate::common::ConnectionConfig::Testnet,
             "mainnet" => crate::common::ConnectionConfig::Mainnet,

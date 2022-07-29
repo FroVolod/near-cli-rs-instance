@@ -2,13 +2,14 @@ use dialoguer::Input;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct Login {
     ///What is the name of the network
     network_name: String,
 }
 
 impl Login {
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         let connection_config = match self.network_name.as_str() {
             "testnet" => crate::common::ConnectionConfig::Testnet,
             "mainnet" => crate::common::ConnectionConfig::Mainnet,
@@ -41,7 +42,7 @@ async fn login(connection_config: crate::common::ConnectionConfig) -> crate::Cli
     let account_id = get_account_from_cli(public_key, connection_config.clone()).await?;
     // save_account(&account_id, key_pair_properties, self.connection_config).await?
     crate::common::save_access_key_to_keychain(
-        Some(connection_config),
+        Some(&connection_config),
         key_pair_properties.clone(),
         &account_id.to_string(),
     )

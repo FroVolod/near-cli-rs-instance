@@ -2,6 +2,7 @@ use dialoguer::Input;
 use serde_json::json;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct SendNFtCommand {
     ///What is the nft-contract account ID?
     nft_contract_account_id: crate::types::account_id::AccountId,
@@ -23,7 +24,9 @@ pub struct SendNFtCommand {
 }
 
 impl SendNFtCommand {
-    fn input_gas(_context: &()) -> color_eyre::eyre::Result<crate::common::NearGas> {
+    fn input_gas(
+        _context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<crate::common::NearGas> {
         println!();
         let gas: u64 = loop {
             let input_gas: crate::common::NearGas = Input::new()
@@ -42,7 +45,9 @@ impl SendNFtCommand {
         Ok(gas.into())
     }
 
-    fn input_deposit(_context: &()) -> color_eyre::eyre::Result<crate::common::NearBalance> {
+    fn input_deposit(
+        _context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<crate::common::NearBalance> {
         println!();
         let deposit: crate::common::NearBalance = Input::new()
             .with_prompt(
@@ -55,6 +60,7 @@ impl SendNFtCommand {
 
     pub async fn process(
         &self,
+        config: crate::config::Config,
         owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
         let method_name = "nft_transfer".to_string();
@@ -87,7 +93,7 @@ impl SendNFtCommand {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -95,7 +101,7 @@ impl SendNFtCommand {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -103,7 +109,7 @@ impl SendNFtCommand {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }

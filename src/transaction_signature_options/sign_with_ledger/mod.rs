@@ -2,6 +2,7 @@ use dialoguer::Input;
 use near_primitives::borsh::BorshSerialize;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[interactive_clap(skip_default_from_cli)]
 pub struct SignLedger {
     #[interactive_clap(long)]
@@ -25,7 +26,7 @@ pub struct SignLedger {
 impl SignLedger {
     pub fn from_cli(
         optional_clap_variant: Option<<SignLedger as interactive_clap::ToCli>::CliVariant>,
-        _context: (),
+        _context: crate::GlobalContext,
     ) -> color_eyre::eyre::Result<Self> {
         let seed_phrase_hd_path = match optional_clap_variant
             .clone()

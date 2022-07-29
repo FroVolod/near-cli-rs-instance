@@ -5,6 +5,7 @@ mod print_keypair_to_terminal;
 mod save_keypair_to_keychain;
 
 #[derive(Debug, Clone, interactive_clap_derive::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct GenerateKeypair {
     #[interactive_clap(subcommand)]
     save_mode: SaveMode,
@@ -13,16 +14,18 @@ pub struct GenerateKeypair {
 impl GenerateKeypair {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         permission: near_primitives::account::AccessKeyPermission,
     ) -> crate::CliResult {
         self.save_mode
-            .process(prepopulated_unsigned_transaction, permission)
+            .process(config, prepopulated_unsigned_transaction, permission)
             .await
     }
 }
 
 #[derive(Debug, Clone, EnumDiscriminants, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Save an access key for this account
 pub enum SaveMode {
@@ -37,6 +40,7 @@ pub enum SaveMode {
 impl SaveMode {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         permission: near_primitives::account::AccessKeyPermission,
     ) -> crate::CliResult {
@@ -61,12 +65,20 @@ impl SaveMode {
         match self {
             SaveMode::SaveToKeychain(save_keypair_to_keychain) => {
                 save_keypair_to_keychain
-                    .process(key_pair_properties, prepopulated_unsigned_transaction)
+                    .process(
+                        config,
+                        key_pair_properties,
+                        prepopulated_unsigned_transaction,
+                    )
                     .await
             }
             SaveMode::PrintToTerminal(print_keypair_to_terminal) => {
                 print_keypair_to_terminal
-                    .process(key_pair_properties, prepopulated_unsigned_transaction)
+                    .process(
+                        config,
+                        key_pair_properties,
+                        prepopulated_unsigned_transaction,
+                    )
                     .await
             }
         }

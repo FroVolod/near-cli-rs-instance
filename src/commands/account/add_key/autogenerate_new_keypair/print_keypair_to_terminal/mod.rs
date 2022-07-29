@@ -1,4 +1,5 @@
 #[derive(Debug, Clone, interactive_clap_derive::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct PrintKeypairToTerminal {
     #[interactive_clap(named_arg)]
     ///Select online mode
@@ -8,6 +9,7 @@ pub struct PrintKeypairToTerminal {
 impl PrintKeypairToTerminal {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         key_pair_properties: crate::common::KeyPairProperties,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
@@ -26,7 +28,7 @@ impl PrintKeypairToTerminal {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -34,7 +36,7 @@ impl PrintKeypairToTerminal {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -42,7 +44,7 @@ impl PrintKeypairToTerminal {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }

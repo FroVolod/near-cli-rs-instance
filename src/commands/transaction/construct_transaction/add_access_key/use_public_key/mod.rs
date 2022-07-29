@@ -1,6 +1,7 @@
 use async_recursion::async_recursion;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct AddAccessKeyAction {
     ///Enter the public key for this account
     public_key: crate::types::public_key::PublicKey,
@@ -12,6 +13,7 @@ impl AddAccessKeyAction {
     #[async_recursion(?Send)]
     pub async fn process(
         &self,
+        config: crate::config::Config,
         mut prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         permission: near_primitives::account::AccessKeyPermission,
     ) -> crate::CliResult {
@@ -29,11 +31,13 @@ impl AddAccessKeyAction {
         match *self.next_action.clone().inner {
             super::super::NextAction::AddAction(select_action) => {
                 select_action
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             super::super::NextAction::Skip(skip_action) => {
-                skip_action.process(prepopulated_unsigned_transaction).await
+                skip_action
+                    .process(config, prepopulated_unsigned_transaction)
+                    .await
             }
         }
     }

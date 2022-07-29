@@ -2,6 +2,7 @@ use async_recursion::async_recursion;
 use dialoguer::Input;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct CallFunctionAction {
     ///What is the name of the function?
     function_name: String,
@@ -20,7 +21,9 @@ pub struct CallFunctionAction {
 }
 
 impl CallFunctionAction {
-    fn input_gas(_context: &()) -> color_eyre::eyre::Result<crate::common::NearGas> {
+    fn input_gas(
+        _context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<crate::common::NearGas> {
         println!();
         let gas: u64 = loop {
             let input_gas: crate::common::NearGas = Input::new()
@@ -39,7 +42,9 @@ impl CallFunctionAction {
         Ok(gas.into())
     }
 
-    fn input_deposit(_context: &()) -> color_eyre::eyre::Result<crate::common::NearBalance> {
+    fn input_deposit(
+        _context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<crate::common::NearBalance> {
         println!();
         let deposit: crate::common::NearBalance = Input::new()
             .with_prompt(
@@ -53,6 +58,7 @@ impl CallFunctionAction {
     #[async_recursion(?Send)]
     pub async fn process(
         &self,
+        config: crate::config::Config,
         mut prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         let action = near_primitives::transaction::Action::FunctionCall(
@@ -67,11 +73,13 @@ impl CallFunctionAction {
         match *self.next_action.clone().inner {
             super::super::super::NextAction::AddAction(select_action) => {
                 select_action
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             super::super::super::NextAction::Skip(skip_action) => {
-                skip_action.process(prepopulated_unsigned_transaction).await
+                skip_action
+                    .process(config, prepopulated_unsigned_transaction)
+                    .await
             }
         }
     }

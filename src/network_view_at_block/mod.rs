@@ -3,6 +3,7 @@ use std::str::FromStr;
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct NetworkViewAtBlockArgs {
     ///What is the name of the network
     network_name: String,
@@ -11,7 +12,10 @@ pub struct NetworkViewAtBlockArgs {
 }
 
 impl NetworkViewAtBlockArgs {
-    pub fn get_connection_config(&self) -> crate::common::ConnectionConfig {
+    pub fn get_connection_config(
+        &self,
+        config: crate::config::Config,
+    ) -> crate::common::ConnectionConfig {
         match self.network_name.as_str() {
             "testnet" => crate::common::ConnectionConfig::Testnet,
             "mainnet" => crate::common::ConnectionConfig::Mainnet,
@@ -35,6 +39,7 @@ impl NetworkViewAtBlockArgs {
 }
 
 #[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Сhoose block for view
 pub enum ViewAtBlock {
@@ -50,12 +55,14 @@ pub enum ViewAtBlock {
 }
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct AtBlockHeight {
     ///Type the block ID height for this account
     block_id_height: near_primitives::types::BlockHeight,
 }
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct BlockIdHash {
     ///Type the block ID hash for this account
     block_id_hash: String,

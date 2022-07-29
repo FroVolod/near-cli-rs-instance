@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct AddAccessWithSeedPhraseAction {
     ///Enter the seed_phrase for this sub-account
     master_seed_phrase: String,
@@ -12,6 +13,7 @@ pub struct AddAccessWithSeedPhraseAction {
 impl AddAccessWithSeedPhraseAction {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         permission: near_primitives::account::AccessKeyPermission,
     ) -> crate::CliResult {
@@ -44,7 +46,7 @@ impl AddAccessWithSeedPhraseAction {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -52,7 +54,7 @@ impl AddAccessWithSeedPhraseAction {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -60,7 +62,7 @@ impl AddAccessWithSeedPhraseAction {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }

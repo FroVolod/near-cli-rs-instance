@@ -2,6 +2,7 @@ use dialoguer::Input;
 use std::io::Write;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct DownloadContract {
     ///What is the contract account ID?
     account_id: crate::types::account_id::AccountId,
@@ -14,7 +15,9 @@ pub struct DownloadContract {
 }
 
 impl DownloadContract {
-    fn input_file_path(_context: &()) -> color_eyre::eyre::Result<crate::types::path_buf::PathBuf> {
+    fn input_file_path(
+        _context: &crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<crate::types::path_buf::PathBuf> {
         println!();
         let input_file_path: String = Input::new()
             .with_prompt("Where to download the contract file?")
@@ -24,9 +27,12 @@ impl DownloadContract {
         Ok(file_path)
     }
 
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(
-            self.network.get_connection_config().rpc_url().as_str(),
+            self.network
+                .get_connection_config(config)
+                .rpc_url()
+                .as_str(),
         )
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: near_primitives::types::Finality::Final.into(),

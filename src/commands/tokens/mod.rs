@@ -8,6 +8,7 @@ mod view_near_balance;
 mod view_nft_assets;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct TokensCommands {
     ///What is your account ID?
     owner_account_id: crate::types::account_id::AccountId,
@@ -16,14 +17,15 @@ pub struct TokensCommands {
 }
 
 impl TokensCommands {
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         self.tokens_actions
-            .process(self.owner_account_id.clone().into())
+            .process(config, self.owner_account_id.clone().into())
             .await
     }
 }
 
 #[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select actions with tokens
 pub enum TokensActions {
@@ -50,17 +52,28 @@ pub enum TokensActions {
 impl TokensActions {
     async fn process(
         &self,
+        config: crate::config::Config,
         owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
         match self {
-            Self::SendNear(send_near_command) => send_near_command.process(owner_account_id).await,
-            Self::ViewNearBalance(view_near_balance) => {
-                view_near_balance.process(owner_account_id).await
+            Self::SendNear(send_near_command) => {
+                send_near_command.process(config, owner_account_id).await
             }
-            Self::SendFt(send_ft_command) => send_ft_command.process(owner_account_id).await,
-            Self::SendNft(send_nft_command) => send_nft_command.process(owner_account_id).await,
-            Self::ViewFtBalance(view_ft_balance) => view_ft_balance.process(owner_account_id).await,
-            Self::ViewNftAssets(view_nft_assets) => view_nft_assets.process(owner_account_id).await,
+            Self::ViewNearBalance(view_near_balance) => {
+                view_near_balance.process(config, owner_account_id).await
+            }
+            Self::SendFt(send_ft_command) => {
+                send_ft_command.process(config, owner_account_id).await
+            }
+            Self::SendNft(send_nft_command) => {
+                send_nft_command.process(config, owner_account_id).await
+            }
+            Self::ViewFtBalance(view_ft_balance) => {
+                view_ft_balance.process(config, owner_account_id).await
+            }
+            Self::ViewNftAssets(view_nft_assets) => {
+                view_nft_assets.process(config, owner_account_id).await
+            }
         }
     }
 }

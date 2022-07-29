@@ -1,4 +1,5 @@
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct CallFunctionView {
     ///What is the account ID?
     account_id: crate::types::account_id::AccountId,
@@ -12,11 +13,11 @@ pub struct CallFunctionView {
 }
 
 impl CallFunctionView {
-    pub async fn process(&self) -> crate::CliResult {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         let args: near_primitives::types::FunctionArgs =
             near_primitives::types::FunctionArgs::from(self.function_args.clone().into_bytes());
         let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(
-            self.network.get_connection_config().rpc_url(),
+            self.network.get_connection_config(config).rpc_url(),
         )
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: self.network.get_block_ref(),

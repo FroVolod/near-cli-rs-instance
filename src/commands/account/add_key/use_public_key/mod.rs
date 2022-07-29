@@ -1,4 +1,5 @@
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct AddAccessKeyAction {
     ///Enter the public key for this account
     public_key: crate::types::public_key::PublicKey,
@@ -10,6 +11,7 @@ pub struct AddAccessKeyAction {
 impl AddAccessKeyAction {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         permission: near_primitives::account::AccessKeyPermission,
     ) -> crate::CliResult {
@@ -37,7 +39,7 @@ impl AddAccessKeyAction {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -45,7 +47,7 @@ impl AddAccessKeyAction {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }
@@ -53,7 +55,7 @@ impl AddAccessKeyAction {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(),
+                        self.network.get_connection_config(config),
                     )
                     .await
             }

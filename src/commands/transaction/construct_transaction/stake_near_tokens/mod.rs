@@ -1,6 +1,7 @@
 use async_recursion::async_recursion;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct StakeNearTokensAction {
     stake_amount: crate::common::NearBalance,
     public_key: crate::types::public_key::PublicKey,
@@ -12,6 +13,7 @@ impl StakeNearTokensAction {
     #[async_recursion(?Send)]
     pub async fn process(
         &self,
+        config: crate::config::Config,
         mut prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         let action = near_primitives::transaction::Action::Stake(
@@ -24,11 +26,13 @@ impl StakeNearTokensAction {
         match *self.next_action.clone().inner {
             super::NextAction::AddAction(select_action) => {
                 select_action
-                    .process(prepopulated_unsigned_transaction)
+                    .process(config, prepopulated_unsigned_transaction)
                     .await
             }
             super::NextAction::Skip(skip_action) => {
-                skip_action.process(prepopulated_unsigned_transaction).await
+                skip_action
+                    .process(config, prepopulated_unsigned_transaction)
+                    .await
             }
         }
     }

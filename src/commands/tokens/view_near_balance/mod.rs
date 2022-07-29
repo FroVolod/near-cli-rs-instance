@@ -1,4 +1,5 @@
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
 pub struct ViewNearBalance {
     #[interactive_clap(named_arg)]
     ///Select online mode
@@ -8,10 +9,11 @@ pub struct ViewNearBalance {
 impl ViewNearBalance {
     pub async fn process(
         &self,
+        config: crate::config::Config,
         owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
         let account_transfer_allowance = crate::common::get_account_transfer_allowance(
-            &self.network.get_connection_config(),
+            &self.network.get_connection_config(config),
             owner_account_id,
             self.network.get_block_ref(),
         )
