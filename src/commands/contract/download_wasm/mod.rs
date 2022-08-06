@@ -31,11 +31,11 @@ impl DownloadContract {
         let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(
             self.network
                 .get_connection_config(config)
-                .rpc_url()
+                .archival_rpc_url()
                 .as_str(),
         )
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-            block_reference: near_primitives::types::Finality::Final.into(),
+            block_reference: self.network.get_block_ref(),
             request: near_primitives::views::QueryRequest::ViewCode {
                 account_id: self.account_id.clone().into(),
             },
