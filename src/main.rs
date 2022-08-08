@@ -1,4 +1,5 @@
 use common::{try_external_subcommand_execution, CliResult};
+use std::io::Write;
 
 mod commands;
 mod common;
@@ -26,18 +27,28 @@ impl Cmd {
 }
 
 fn main() -> CliResult {
-    let config: crate::config::Config = toml::from_str(
-        r#"
-        [networks.mainnet]
-        url = "https://archival-rpc.mainnet.near.org"
+    let config_default = crate::config::Config::default();
+    let config_default_toml = toml::to_string(&config_default)?;
 
-        [networks.testnet]
-        url = "https://archival-rpc.testnet.near.org"
-
-        [networks.localnet]
-        url = "http://127.0.0.1:3030"
-    "#,
-    )?;
+    let home_dir = dirs::home_dir().expect("Impossible to get your home dir!");
+    let mut path_config_toml = std::path::PathBuf::from(&home_dir);
+    path_config_toml.push(".near-credentials");
+    std::fs::create_dir_all(&path_config_toml)?;
+    path_config_toml.push("config.toml");
+    if !path_config_toml.is_file() {
+        std::fs::File::create(&path_config_toml)
+            .map_err(|err| color_eyre::Report::msg(format!("Failed to create file: {:?}", err)))?
+            .write(config_default_toml.as_bytes())
+            .map_err(|err| {
+                color_eyre::Report::msg(format!("Failed to write to file: {:?}", err))
+            })?;
+        println!(
+            "The data for the access key is saved in a file {}",
+            &path_config_toml.display()
+        );
+    };
+    let config_toml = std::fs::read_to_string(path_config_toml)?;
+    let config: crate::config::Config = toml::from_str(&config_toml)?;
 
     color_eyre::install()?;
 
