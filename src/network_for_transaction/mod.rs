@@ -24,7 +24,7 @@ impl NetworkForTransactionArgs {
             .default(0)
             .interact()
             .unwrap();
-        let url = context.0.networks.get(variants[select_submit]).unwrap().url.clone();
+        let url = context.0.networks.get(variants[select_submit]).unwrap().rpc_url.clone();
         Ok(variants[select_submit].to_string())
         // Ok(Input::new()
         //     .with_prompt("What is the name of the network?")

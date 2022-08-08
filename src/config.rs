@@ -5,32 +5,32 @@ pub struct Config {
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct NetworkConfig {
-    pub url: url::Url,
+    pub rpc_url: url::Url,
     api_key: Option<String>,
 }
 
-// impl Default for Config {
-//     fn default() -> Self {
-//         let mut networks = std::collections::HashMap::new();
-//         networks.insert("mainnet", NetworkConfig {
-//             rpc_url: url::Url::new("https://archival-rpc.mainnet.near.org").unwrap(),
-//             // wallet_url
-//             // explorer_transaction_url
-//             api_key: None,
-//         });
-//         networks.insert("testnet", NetworkConfig {
-//             url: url::Url::new("https://archival-rpc.testnet.near.org").unwrap(),
-//             api_key: None,
-//         });
-//          networks.insert("localnet", NetworkConfig {
-//             url: url::Url::new("http://127.0.0.1:3030").unwrap(),
-//             api_key: None,
-//         });
-//         Self {
-//             networks
-//         }
-//     }
-// }
+impl Default for Config {
+    fn default() -> Self {
+        let mut networks = std::collections::HashMap::new();
+        networks.insert("mainnet".to_string(), NetworkConfig {
+            rpc_url: "https://archival-rpc.mainnet.near.org".parse().unwrap(),
+            // wallet_url
+            // explorer_transaction_url
+            api_key: None,
+        });
+        networks.insert("testnet".to_string(), NetworkConfig {
+            rpc_url: "https://archival-rpc.testnet.near.org".parse().unwrap(),
+            api_key: None,
+        });
+         networks.insert("localnet".to_string(), NetworkConfig {
+            rpc_url: "http://127.0.0.1:3030".parse().unwrap(),
+            api_key: None,
+        });
+        Self {
+            networks
+        }
+    }
+}
 
 // #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 // pub struct Config {
