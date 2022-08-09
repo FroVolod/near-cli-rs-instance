@@ -10,7 +10,7 @@ pub struct FullAccessType {
 
 impl FullAccessType {
     pub async fn process(
-        self,
+        &self,
         config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
@@ -148,7 +148,7 @@ impl FunctionCallType {
     }
 
     pub async fn process(
-        self,
+        &self,
         config: crate::config::Config,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
