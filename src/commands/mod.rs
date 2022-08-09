@@ -1,6 +1,7 @@
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
 mod account;
+mod config;
 mod contract;
 mod tokens;
 mod transaction;
@@ -26,6 +27,11 @@ pub enum TopLevelCommand {
     #[strum_discriminants(strum(message = "transaction - Operate transactions"))]
     /// Use this to construct transactions or view a transaction status.
     Transaction(self::transaction::TransactionCommands),
+    #[strum_discriminants(strum(
+        message = "config      - Manage connections in a configuration file (config.toml)"
+    ))]
+    /// Use this to manage connections in a configuration file (config.toml).
+    Config(self::config::ConfigCommands),
 }
 
 impl TopLevelCommand {
@@ -35,6 +41,7 @@ impl TopLevelCommand {
             Self::Account(account_commands) => account_commands.process(config).await,
             Self::Contract(contract_commands) => contract_commands.process(config).await,
             Self::Transaction(transaction_commands) => transaction_commands.process(config).await,
+            Self::Config(config_commands) => config_commands.process(config).await,
         }
     }
 }

@@ -1249,6 +1249,34 @@ pub async fn save_access_key_to_keychain(
     Ok(())
 }
 
+pub fn get_config_toml() -> color_eyre::eyre::Result<crate::config::Config> {
+    let config_default = crate::config::Config::default();
+
+    let mut path_config_toml = std::path::PathBuf::from(&config_default.credentials_home_dir);
+    std::fs::create_dir_all(&path_config_toml)?;
+    path_config_toml.push("config.toml");
+    if !path_config_toml.is_file() {
+        write_config_toml(config_default)?;
+    };
+    let config_toml = std::fs::read_to_string(path_config_toml)?;
+    Ok(toml::from_str(&config_toml)?)
+}
+
+pub fn write_config_toml(config: crate::config::Config) -> CliResult {
+    let config_toml = toml::to_string(&config)?;
+    let mut path_config_toml = std::path::PathBuf::from(&config.credentials_home_dir);
+    path_config_toml.push("config.toml");
+    std::fs::File::create(&path_config_toml)
+        .map_err(|err| color_eyre::Report::msg(format!("Failed to create file: {:?}", err)))?
+        .write(config_toml.as_bytes())
+        .map_err(|err| color_eyre::Report::msg(format!("Failed to write to file: {:?}", err)))?;
+    println!(
+        "The data for the access key is saved in a file {}",
+        &path_config_toml.display()
+    );
+    Ok(())
+}
+
 pub fn try_external_subcommand_execution(error: clap::Error) -> CliResult {
     let (subcommand, args) = {
         let mut args = std::env::args().skip(1);

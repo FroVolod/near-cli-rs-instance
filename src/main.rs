@@ -21,34 +21,13 @@ struct Cmd {
 }
 
 impl Cmd {
-    async fn process(self, config: crate::config::Config) -> CliResult {
+    async fn process(&self, config: crate::config::Config) -> CliResult {
         self.top_level.process(config).await
     }
 }
 
 fn main() -> CliResult {
-    let config_default = crate::config::Config::default();
-    let config_default_toml = toml::to_string(&config_default)?;
-
-    let home_dir = dirs::home_dir().expect("Impossible to get your home dir!");
-    let mut path_config_toml = std::path::PathBuf::from(&home_dir);
-    path_config_toml.push(".near-credentials");
-    std::fs::create_dir_all(&path_config_toml)?;
-    path_config_toml.push("config.toml");
-    if !path_config_toml.is_file() {
-        std::fs::File::create(&path_config_toml)
-            .map_err(|err| color_eyre::Report::msg(format!("Failed to create file: {:?}", err)))?
-            .write(config_default_toml.as_bytes())
-            .map_err(|err| {
-                color_eyre::Report::msg(format!("Failed to write to file: {:?}", err))
-            })?;
-        println!(
-            "The data for the access key is saved in a file {}",
-            &path_config_toml.display()
-        );
-    };
-    let config_toml = std::fs::read_to_string(path_config_toml)?;
-    let config: crate::config::Config = toml::from_str(&config_toml)?;
+    let config = crate::common::get_config_toml()?;
 
     color_eyre::install()?;
 
