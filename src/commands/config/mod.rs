@@ -46,7 +46,6 @@ impl ConfigActions {
             Self::Delete(delete_network_connection) => {
                 delete_network_connection.process(config).await
             }
-            _ => todo!(),
         }
     }
 }
