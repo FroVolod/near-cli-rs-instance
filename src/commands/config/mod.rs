@@ -19,7 +19,7 @@ impl ConfigCommands {
 #[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(context = crate::GlobalContext)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
-/// What do you want to do with an account?
+/// What do you want to do with a near-cli config?
 pub enum ConfigActions {
     #[strum_discriminants(strum(
         message = "list             - View a list of network connections"
@@ -41,7 +41,7 @@ impl ConfigActions {
                 let config_toml = toml::to_string(&config)?;
                 println!("\n{}", &config_toml);
                 Ok(())
-            },
+            }
             Self::Add(add_network_connection) => add_network_connection.process(config).await,
             Self::Delete(delete_network_connection) => {
                 delete_network_connection.process(config).await
