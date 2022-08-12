@@ -23,7 +23,7 @@ impl ViewFtBalance {
         .to_string()
         .into_bytes();
         let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(
-            self.network.get_connection_config(config).rpc_url(),
+            self.network.get_network_config(config).rpc_url,
         )
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: self.network.get_block_ref(),

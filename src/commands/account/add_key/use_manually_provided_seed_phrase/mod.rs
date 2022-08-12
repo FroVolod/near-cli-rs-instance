@@ -46,8 +46,7 @@ impl AddAccessWithSeedPhraseAction {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config.clone()),
-                        self.network.get_network_config(config.clone()),
+                        self.network.get_network_config(config),
                     )
                     .await
             }
@@ -55,7 +54,6 @@ impl AddAccessWithSeedPhraseAction {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config.clone()).clone(),
                         self.network.get_network_config(config.clone()),
                         config.credentials_home_dir,
                     )
@@ -65,8 +63,7 @@ impl AddAccessWithSeedPhraseAction {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config.clone()),
-                        self.network.get_network_config(config.clone()),
+                        self.network.get_network_config(config),
                     )
                     .await
             }

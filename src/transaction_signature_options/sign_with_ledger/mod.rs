@@ -82,7 +82,6 @@ impl SignLedger {
     pub async fn process(
         &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
-        network_connection_config: crate::common::ConnectionConfig,
         network_config: crate::config::NetworkConfig,
     ) -> crate::CliResult {
         let seed_phrase_hd_path = self.seed_phrase_hd_path.clone().into();
@@ -153,7 +152,6 @@ impl SignLedger {
         println!("Your transaction was signed successfully.");
         self.submit
             .process(
-                network_connection_config,
                 network_config,
                 signed_transaction,
                 serialize_to_base64,

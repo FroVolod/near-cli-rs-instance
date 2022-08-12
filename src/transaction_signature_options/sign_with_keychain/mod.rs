@@ -49,11 +49,9 @@ impl SignKeychain {
     pub async fn process(
         &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
-        network_connection_config: crate::common::ConnectionConfig,
         network_config: crate::config::NetworkConfig,
         credentials_home_dir: std::path::PathBuf,
     ) -> crate::CliResult {
-        let home_dir = dirs::home_dir().expect("Impossible to get your home dir!");
         let file_name = format!("{}.json", prepopulated_unsigned_transaction.signer_id);
         let mut path = std::path::PathBuf::from(&credentials_home_dir);
 
@@ -89,7 +87,7 @@ impl SignKeychain {
                     } else {
                         return Err(color_eyre::Report::msg(format!("Error call result")));
                     };
-                let mut path = std::path::PathBuf::from(&home_dir);
+                let mut path = std::path::PathBuf::from(&credentials_home_dir);
                 path.push(dir_name);
                 path.push(&prepopulated_unsigned_transaction.signer_id.to_string());
                 let mut data_path = std::path::PathBuf::new();
@@ -147,7 +145,7 @@ impl SignKeychain {
         sign_with_private_key
             .process(
                 prepopulated_unsigned_transaction,
-                network_connection_config,
+                // network_connection_config,
                 network_config,
             )
             .await

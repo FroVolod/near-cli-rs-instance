@@ -38,26 +38,26 @@ where
     variants[selected]
 }
 
-#[derive(Debug, Clone)]
-pub enum ViewItems {
-    ViewAccountSummary,
-    ViewAccessKeyList,
-    ViewNonce,
-    ViewCallFunction,
-    ViewContractHash,
-    ViewContractCode,
-    ViewContractState,
-    ViewTransactionStatus,
-    ViewNearBalance,
-    ViewFtBalance,
-    ViewNftBalance,
-}
+// #[derive(Debug, Clone)]
+// pub enum ViewItems {
+//     ViewAccountSummary,
+//     ViewAccessKeyList,
+//     ViewNonce,
+//     ViewCallFunction,
+//     ViewContractHash,
+//     ViewContractCode,
+//     ViewContractState,
+//     ViewTransactionStatus,
+//     ViewNearBalance,
+//     ViewFtBalance,
+//     ViewNftBalance,
+// }
 
-#[derive(Debug, Clone)]
-pub struct SignerContext {
-    pub connection_config: Option<ConnectionConfig>,
-    pub signer_account_id: crate::types::account_id::AccountId,
-}
+// #[derive(Debug, Clone)]
+// pub struct SignerContext {
+//     pub connection_config: Option<ConnectionConfig>,
+//     pub signer_account_id: crate::types::account_id::AccountId,
+// }
 
 #[derive(
     Debug,
@@ -405,73 +405,6 @@ impl From<TransferAmount> for NearBalance {
     }
 }
 
-#[derive(Debug, Clone)]
-pub enum ConnectionConfig {
-    Testnet,
-    Mainnet,
-    Betanet,
-    Custom { url: url::Url },
-}
-
-impl ConnectionConfig {
-    pub fn from_custom_url(custom_url: &AvailableRpcServerUrl) -> Self {
-        Self::Custom {
-            url: custom_url.inner.clone(),
-        }
-    }
-
-    pub fn rpc_url(&self) -> url::Url {
-        match self {
-            Self::Testnet => crate::consts::TESTNET_API_SERVER_URL.parse().unwrap(),
-            Self::Mainnet => crate::consts::MAINNET_API_SERVER_URL.parse().unwrap(),
-            Self::Betanet => crate::consts::BETANET_API_SERVER_URL.parse().unwrap(),
-            Self::Custom { url } => url.clone(),
-        }
-    }
-
-    pub fn archival_rpc_url(&self) -> url::Url {
-        match self {
-            Self::Testnet => crate::consts::TESTNET_ARCHIVAL_API_SERVER_URL
-                .parse()
-                .unwrap(),
-            Self::Mainnet => crate::consts::MAINNET_ARCHIVAL_API_SERVER_URL
-                .parse()
-                .unwrap(),
-            Self::Betanet => crate::consts::BETANET_ARCHIVAL_API_SERVER_URL
-                .parse()
-                .unwrap(),
-            Self::Custom { url } => url.clone(),
-        }
-    }
-
-    pub fn wallet_url(&self) -> url::Url {
-        match self {
-            Self::Testnet => crate::consts::TESTNET_WALLET_URL.parse().unwrap(),
-            Self::Mainnet => crate::consts::MAINNET_WALLET_URL.parse().unwrap(),
-            Self::Betanet => crate::consts::BETANET_WALLET_URL.parse().unwrap(),
-            Self::Custom { url } => url.clone(),
-        }
-    }
-
-    pub fn transaction_explorer(&self) -> url::Url {
-        match self {
-            Self::Testnet => crate::consts::TESTNET_TRANSACTION_URL.parse().unwrap(),
-            Self::Mainnet => crate::consts::MAINNET_TRANSACTION_URL.parse().unwrap(),
-            Self::Betanet => crate::consts::BETANET_TRANSACTION_URL.parse().unwrap(),
-            Self::Custom { url } => url.clone(),
-        }
-    }
-
-    pub fn dir_name(&self) -> &str {
-        match self {
-            Self::Testnet => crate::consts::DIR_NAME_TESTNET,
-            Self::Mainnet => crate::consts::DIR_NAME_MAINNET,
-            Self::Betanet => crate::consts::DIR_NAME_BETANET,
-            Self::Custom { url: _ } => crate::consts::DIR_NAME_CUSTOM,
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct AccountTransferAllowance {
     account_id: near_primitives::types::AccountId,
@@ -513,12 +446,12 @@ impl AccountTransferAllowance {
 }
 
 pub async fn get_account_transfer_allowance(
-    connection_config: &ConnectionConfig,
+    network_config: crate::config::NetworkConfig,
     account_id: near_primitives::types::AccountId,
     block_reference: BlockReference,
 ) -> color_eyre::eyre::Result<AccountTransferAllowance> {
     let account_view = if let Some(account_view) =
-        get_account_state(connection_config, account_id.clone(), block_reference).await?
+        get_account_state(network_config.clone(), account_id.clone(), block_reference).await?
     {
         account_view
     } else {
@@ -531,7 +464,7 @@ pub async fn get_account_transfer_allowance(
         });
     };
     let storage_amount_per_byte = near_jsonrpc_client::JsonRpcClient::connect(
-        connection_config.rpc_url(),
+        network_config.rpc_url,
     )
     .call(
         near_jsonrpc_client::methods::EXPERIMENTAL_protocol_config::RpcProtocolConfigRequest {
@@ -560,13 +493,12 @@ pub async fn get_account_transfer_allowance(
 }
 
 pub async fn get_account_state(
-    connection_config: &ConnectionConfig,
+    network_config: crate::config::NetworkConfig,
     account_id: near_primitives::types::AccountId,
     block_reference: BlockReference,
 ) -> color_eyre::eyre::Result<Option<near_primitives::views::AccountView>> {
     let server_addr = match block_reference {
-        BlockReference::Finality(_) => connection_config.rpc_url(),
-        BlockReference::BlockId(_) => connection_config.archival_rpc_url(),
+        BlockReference::Finality(_) | BlockReference::BlockId(_) => network_config.rpc_url,
         BlockReference::SyncCheckpoint(_) => todo!(),
     };
     let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(server_addr)
@@ -1164,7 +1096,7 @@ pub fn print_transaction_error(tx_execution_error: near_primitives::errors::TxEx
 
 pub fn print_transaction_status(
     transaction_info: near_primitives::views::FinalExecutionOutcomeView,
-    network_connection_config: Option<crate::common::ConnectionConfig>,
+    network_config: crate::config::NetworkConfig,
 ) {
     match transaction_info.status {
         near_primitives::views::FinalExecutionStatus::NotStarted
@@ -1176,18 +1108,15 @@ pub fn print_transaction_status(
             print_value_successful_transaction(transaction_info.clone())
         }
     };
-    let transaction_explorer: url::Url = match network_connection_config {
-        Some(connection_config) => connection_config.transaction_explorer(),
-        None => unreachable!("Error"),
-    };
     println!("Transaction ID: {id}\nTo see the transaction in the transaction explorer, please open this url in your browser:\n{path}{id}\n",
         id=transaction_info.transaction_outcome.id,
-        path=transaction_explorer
+        path=network_config.explorer_transaction_url
     );
 }
 
 pub async fn save_access_key_to_keychain(
-    network_connection_config: Option<&crate::common::ConnectionConfig>,
+    network_config: crate::config::NetworkConfig,
+    credentials_home_dir: std::path::PathBuf,
     key_pair_properties: crate::common::KeyPairProperties,
     account_id: &str,
 ) -> crate::CliResult {
@@ -1201,17 +1130,13 @@ pub async fn save_access_key_to_keychain(
             "private_key": key_pair_properties.secret_keypair_str,
         })
     );
-    let home_dir = dirs::home_dir().expect("Impossible to get your home dir!");
-    let dir_name = match &network_connection_config {
-        Some(connection_config) => connection_config.dir_name(),
-        None => crate::consts::DIR_NAME_KEY_CHAIN,
-    };
+    let dir_name = network_config.network_name.as_str();
     let file_with_key_name: std::path::PathBuf = format!(
         "{}.json",
         key_pair_properties.public_key_str.replace(":", "_")
     )
     .into();
-    let mut path_with_key_name = std::path::PathBuf::from(&home_dir);
+    let mut path_with_key_name = std::path::PathBuf::from(&credentials_home_dir);
     path_with_key_name.push(dir_name);
     path_with_key_name.push(account_id);
     std::fs::create_dir_all(&path_with_key_name)?;
@@ -1226,7 +1151,7 @@ pub async fn save_access_key_to_keychain(
     );
 
     let file_with_account_name: std::path::PathBuf = format!("{}.json", account_id).into();
-    let mut path_with_account_name = std::path::PathBuf::from(&home_dir);
+    let mut path_with_account_name = std::path::PathBuf::from(&credentials_home_dir);
     path_with_account_name.push(dir_name);
     path_with_account_name.push(file_with_account_name);
     if path_with_account_name.exists() {
@@ -1348,10 +1273,10 @@ fn path_directories() -> Vec<std::path::PathBuf> {
 
 pub async fn display_account_info(
     account_id: AccountId,
-    conf: &ConnectionConfig,
+    network_config: crate::config::NetworkConfig,
     block_ref: BlockReference,
 ) -> crate::CliResult {
-    let resp = near_jsonrpc_client::JsonRpcClient::connect(conf.archival_rpc_url())
+    let resp = near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url)
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: block_ref,
             request: QueryRequest::ViewAccount {
@@ -1394,10 +1319,10 @@ pub async fn display_account_info(
 
 pub async fn display_access_key_list(
     account_id: AccountId,
-    conf: &ConnectionConfig,
+    network_config: crate::config::NetworkConfig,
     block_ref: BlockReference,
 ) -> crate::CliResult {
-    let resp = near_jsonrpc_client::JsonRpcClient::connect(conf.archival_rpc_url())
+    let resp = near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url)
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: block_ref,
             request: QueryRequest::ViewAccessKeyList { account_id },

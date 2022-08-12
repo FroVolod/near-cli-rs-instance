@@ -273,8 +273,7 @@ impl SkipAction {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config.clone()),
-                        self.network.get_network_config(config.clone()),
+                        self.network.get_network_config(config),
                     )
                     .await
             }
@@ -282,7 +281,6 @@ impl SkipAction {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config.clone()),
                         self.network.get_network_config(config.clone()),
                         config.credentials_home_dir,
                     )
@@ -292,8 +290,7 @@ impl SkipAction {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config.clone()),
-                        self.network.get_network_config(config.clone()),
+                        self.network.get_network_config(config),
                     )
                     .await
             }

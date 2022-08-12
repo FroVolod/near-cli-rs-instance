@@ -12,7 +12,7 @@ impl ViewListKeys {
     pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         crate::common::display_access_key_list(
             self.account_id.clone().into(),
-            &self.network.get_connection_config(config),
+            self.network.get_network_config(config),
             self.network.get_block_ref(),
         )
         .await?;

@@ -1,3 +1,4 @@
+use dialoguer::{theme::ColorfulTheme, Select};
 use near_primitives::types::{BlockId, BlockReference, Finality};
 use std::str::FromStr;
 use strum::{EnumDiscriminants, EnumIter, EnumMessage};
@@ -6,22 +7,33 @@ use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 #[interactive_clap(context = crate::GlobalContext)]
 pub struct NetworkViewAtBlockArgs {
     ///What is the name of the network
+    #[interactive_clap(skip_default_input_arg)]
     network_name: String,
     #[interactive_clap(subcommand)]
     next: ViewAtBlock,
 }
 
 impl NetworkViewAtBlockArgs {
-    pub fn get_connection_config(
+    fn input_network_name(context: &crate::GlobalContext) -> color_eyre::eyre::Result<String> {
+        let variants = context.0.networks.keys().collect::<Vec<_>>();
+        let select_submit = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("What is the name of the network?")
+            .items(&variants)
+            .default(0)
+            .interact()
+            .unwrap();
+        Ok(variants[select_submit].to_string())
+    }
+
+    pub fn get_network_config(
         &self,
         config: crate::config::Config,
-    ) -> crate::common::ConnectionConfig {
-        match self.network_name.as_str() {
-            "testnet" => crate::common::ConnectionConfig::Testnet,
-            "mainnet" => crate::common::ConnectionConfig::Mainnet,
-            "betanet" => crate::common::ConnectionConfig::Betanet,
-            _ => todo!(),
-        }
+    ) -> crate::config::NetworkConfig {
+        let network_config = config.networks;
+        network_config
+            .get(self.network_name.as_str())
+            .expect("Impossible to get network name!")
+            .clone()
     }
 
     pub fn get_block_ref(&self) -> BlockReference {

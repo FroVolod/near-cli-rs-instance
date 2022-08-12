@@ -12,7 +12,6 @@ pub struct NetworkForTransactionArgs {
 
 impl NetworkForTransactionArgs {
     fn input_network_name(context: &crate::GlobalContext) -> color_eyre::eyre::Result<String> {
-        println!("---  context: {:#?}", &context.0.networks);
         let variants = context.0.networks.keys().collect::<Vec<_>>();
         let select_submit = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("What is the name of the network?")
@@ -21,18 +20,6 @@ impl NetworkForTransactionArgs {
             .interact()
             .unwrap();
         Ok(variants[select_submit].to_string())
-    }
-
-    pub fn get_connection_config(
-        &self,
-        config: crate::config::Config,
-    ) -> crate::common::ConnectionConfig {
-        match self.network_name.as_str() {
-            "testnet" => crate::common::ConnectionConfig::Testnet,
-            "mainnet" => crate::common::ConnectionConfig::Mainnet,
-            "betanet" => crate::common::ConnectionConfig::Betanet,
-            _ => todo!(),
-        }
     }
 
     pub fn get_network_config(

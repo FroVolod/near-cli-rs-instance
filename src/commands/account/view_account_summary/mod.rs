@@ -10,16 +10,16 @@ pub struct ViewAccountSummary {
 
 impl ViewAccountSummary {
     pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
-        let connection_config = self.network.get_connection_config(config);
+        let network_config = self.network.get_network_config(config);
         crate::common::display_account_info(
             self.account_id.clone().into(),
-            &connection_config,
+            network_config.clone(),
             self.network.get_block_ref(),
         )
         .await?;
         crate::common::display_access_key_list(
             self.account_id.clone().into(),
-            &connection_config,
+            network_config,
             self.network.get_block_ref(),
         )
         .await?;

@@ -29,10 +29,7 @@ impl DownloadContract {
 
     pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(
-            self.network
-                .get_connection_config(config)
-                .archival_rpc_url()
-                .as_str(),
+            self.network.get_network_config(config).rpc_url.as_str(),
         )
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: self.network.get_block_ref(),

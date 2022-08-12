@@ -37,7 +37,7 @@ impl Default for Config {
             NetworkConfig {
                 network_name: "testnet".to_string(),
                 rpc_url: "https://archival-rpc.testnet.near.org".parse().unwrap(),
-                wallet_url: "https://wallet.mainnet.near.org".parse().unwrap(),
+                wallet_url: "https://wallet.testnet.near.org".parse().unwrap(),
                 explorer_transaction_url: "https://explorer.testnet.near.org/transactions/"
                     .parse()
                     .unwrap(),

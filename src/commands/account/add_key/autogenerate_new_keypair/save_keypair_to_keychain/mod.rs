@@ -13,9 +13,10 @@ impl SaveKeypairToKeychain {
         key_pair_properties: crate::common::KeyPairProperties,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
-        let connection_config = self.network.get_connection_config(config.clone());
+        let network_config = self.network.get_network_config(config.clone());
         crate::common::save_access_key_to_keychain(
-            Some(&connection_config),
+            network_config,
+            config.credentials_home_dir.clone(),
             key_pair_properties,
             &prepopulated_unsigned_transaction.receiver_id.to_string(),
         )
@@ -30,8 +31,7 @@ impl SaveKeypairToKeychain {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config.clone()),
-                        self.network.get_network_config(config.clone()),
+                        self.network.get_network_config(config),
                     )
                     .await
             }
@@ -39,7 +39,6 @@ impl SaveKeypairToKeychain {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config.clone()).clone(),
                         self.network.get_network_config(config.clone()),
                         config.credentials_home_dir,
                     )
@@ -49,8 +48,7 @@ impl SaveKeypairToKeychain {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config.clone()),
-                        self.network.get_network_config(config.clone()),
+                        self.network.get_network_config(config),
                     )
                     .await
             }

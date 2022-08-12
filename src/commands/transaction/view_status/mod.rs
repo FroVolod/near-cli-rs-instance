@@ -1,3 +1,4 @@
+use dialoguer::{theme::ColorfulTheme, Select};
 use std::str::FromStr;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
@@ -8,18 +9,29 @@ pub struct TransactionInfo {
     ///What is the signer account ID?
     signer_account_id: crate::types::account_id::AccountId,
     ///What is the name of the network
+    #[interactive_clap(skip_default_input_arg)]
     network_name: String,
 }
 
 impl TransactionInfo {
+    fn input_network_name(context: &crate::GlobalContext) -> color_eyre::eyre::Result<String> {
+        let variants = context.0.networks.keys().collect::<Vec<_>>();
+        let select_submit = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("What is the name of the network?")
+            .items(&variants)
+            .default(0)
+            .interact()
+            .unwrap();
+        Ok(variants[select_submit].to_string())
+    }
+
     pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
-        let connection_config = match self.network_name.as_str() {
-            "testnet" => crate::common::ConnectionConfig::Testnet,
-            "mainnet" => crate::common::ConnectionConfig::Mainnet,
-            "betanet" => crate::common::ConnectionConfig::Betanet,
-            _ => todo!(),
-        };
-        let query_view_transaction_status = near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url())
+        let networks = config.networks;
+        let network_config = networks
+            .get(self.network_name.as_str())
+            .expect("Impossible to get network name!")
+            .clone();
+        let query_view_transaction_status = near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url)
             .call(near_jsonrpc_client::methods::EXPERIMENTAL_tx_status::RpcTransactionStatusRequest {
                 transaction_info: near_jsonrpc_client::methods::EXPERIMENTAL_tx_status::TransactionInfo::TransactionId {
                     hash: near_primitives::hash::CryptoHash::from_str(&self.transaction_hash).unwrap(),

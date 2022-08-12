@@ -94,7 +94,6 @@ impl Submit {
 
     pub async fn process(
         &self,
-        network_connection_config: crate::common::ConnectionConfig,
         network_config: crate::config::NetworkConfig,
         signed_transaction: near_primitives::transaction::SignedTransaction,
         serialize_to_base64: String,

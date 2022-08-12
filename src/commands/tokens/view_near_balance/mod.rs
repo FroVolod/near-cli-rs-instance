@@ -13,7 +13,7 @@ impl ViewNearBalance {
         owner_account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
         let account_transfer_allowance = crate::common::get_account_transfer_allowance(
-            &self.network.get_connection_config(config),
+            self.network.get_network_config(config),
             owner_account_id,
             self.network.get_block_ref(),
         )
