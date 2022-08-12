@@ -110,11 +110,7 @@ impl SignPrivateKey {
         crate::common::print_transaction(signed_transaction.transaction.clone());
         println!("Your transaction was signed successfully.");
         self.submit
-            .process(
-                network_config,
-                signed_transaction,
-                serialize_to_base64,
-            )
+            .process(network_config, signed_transaction, serialize_to_base64)
             .await
     }
 }

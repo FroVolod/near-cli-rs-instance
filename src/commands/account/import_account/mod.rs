@@ -1,4 +1,4 @@
-use dialoguer::{theme::ColorfulTheme, Input, Select};
+use dialoguer::Input;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
@@ -11,14 +11,7 @@ pub struct Login {
 
 impl Login {
     fn input_network_name(context: &crate::GlobalContext) -> color_eyre::eyre::Result<String> {
-        let variants = context.0.networks.keys().collect::<Vec<_>>();
-        let select_submit = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("What is the name of the network?")
-            .items(&variants)
-            .default(0)
-            .interact()
-            .unwrap();
-        Ok(variants[select_submit].to_string())
+        crate::common::input_network_name(context)
     }
 
     pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
