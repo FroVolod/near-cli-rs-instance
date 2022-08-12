@@ -35,6 +35,17 @@ impl NetworkForTransactionArgs {
         }
     }
 
+    pub fn get_network_config(
+        &self,
+        config: crate::config::Config,
+    ) -> crate::config::NetworkConfig {
+        let network_config = config.networks;
+        network_config
+            .get(self.network_name.as_str())
+            .expect("Impossible to get network name!")
+            .clone()
+    }
+
     pub fn get_sign_option(&self) -> crate::transaction_signature_options::SignWith {
         self.transaction_signature_options.clone()
     }

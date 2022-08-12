@@ -83,10 +83,11 @@ impl SignLedger {
         &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         network_connection_config: crate::common::ConnectionConfig,
+        network_config: crate::config::NetworkConfig,
     ) -> crate::CliResult {
         let seed_phrase_hd_path = self.seed_phrase_hd_path.clone().into();
         let online_signer_access_key_response =
-            near_jsonrpc_client::JsonRpcClient::connect(network_connection_config.rpc_url())
+            near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone())
                 .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
                     block_reference: near_primitives::types::Finality::Final.into(),
                     request: near_primitives::views::QueryRequest::ViewAccessKey {
@@ -153,6 +154,7 @@ impl SignLedger {
         self.submit
             .process(
                 network_connection_config,
+                network_config,
                 signed_transaction,
                 serialize_to_base64,
             )

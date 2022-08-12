@@ -13,7 +13,7 @@ impl SaveKeypairToKeychain {
         key_pair_properties: crate::common::KeyPairProperties,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
-        let connection_config = self.network.get_connection_config(config);
+        let connection_config = self.network.get_connection_config(config.clone());
         crate::common::save_access_key_to_keychain(
             Some(&connection_config),
             key_pair_properties,
@@ -28,17 +28,30 @@ impl SaveKeypairToKeychain {
                 sign_private_key,
             ) => {
                 sign_private_key
-                    .process(prepopulated_unsigned_transaction, connection_config)
+                    .process(
+                        prepopulated_unsigned_transaction,
+                        self.network.get_connection_config(config.clone()),
+                        self.network.get_network_config(config.clone()),
+                    )
                     .await
             }
             crate::transaction_signature_options::SignWith::SignWithKeychain(sign_keychain) => {
                 sign_keychain
-                    .process(prepopulated_unsigned_transaction, connection_config)
+                    .process(
+                        prepopulated_unsigned_transaction,
+                        self.network.get_connection_config(config.clone()).clone(),
+                        self.network.get_network_config(config.clone()),
+                        config.credentials_home_dir,
+                    )
                     .await
             }
             crate::transaction_signature_options::SignWith::SignWithLedger(sign_ledger) => {
                 sign_ledger
-                    .process(prepopulated_unsigned_transaction, connection_config)
+                    .process(
+                        prepopulated_unsigned_transaction,
+                        self.network.get_connection_config(config.clone()),
+                        self.network.get_network_config(config.clone()),
+                    )
                     .await
             }
         }

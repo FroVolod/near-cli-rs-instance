@@ -6,7 +6,10 @@ pub struct Config {
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct NetworkConfig {
+    pub network_name: String,
     pub rpc_url: url::Url,
+    pub wallet_url: url::Url,
+    pub explorer_transaction_url: url::Url,
     pub api_key: Option<String>,
 }
 
@@ -20,23 +23,36 @@ impl Default for Config {
         networks.insert(
             "mainnet".to_string(),
             NetworkConfig {
+                network_name: "mainnet".to_string(),
                 rpc_url: "https://archival-rpc.mainnet.near.org".parse().unwrap(),
-                // wallet_url
-                // explorer_transaction_url
+                wallet_url: "https://wallet.mainnet.near.org".parse().unwrap(),
+                explorer_transaction_url: "https://explorer.mainnet.near.org/transactions/"
+                    .parse()
+                    .unwrap(),
                 api_key: None,
             },
         );
         networks.insert(
             "testnet".to_string(),
             NetworkConfig {
+                network_name: "testnet".to_string(),
                 rpc_url: "https://archival-rpc.testnet.near.org".parse().unwrap(),
+                wallet_url: "https://wallet.mainnet.near.org".parse().unwrap(),
+                explorer_transaction_url: "https://explorer.testnet.near.org/transactions/"
+                    .parse()
+                    .unwrap(),
                 api_key: None,
             },
         );
         networks.insert(
-            "localnet".to_string(),
+            "betanet".to_string(),
             NetworkConfig {
-                rpc_url: "http://127.0.0.1:3030".parse().unwrap(),
+                network_name: "betanet".to_string(),
+                rpc_url: "https://rpc.betanet.near.org".parse().unwrap(),
+                wallet_url: "https://wallet.betanet.near.org".parse().unwrap(),
+                explorer_transaction_url: "https://explorer.betanet.near.org/transactions/"
+                    .parse()
+                    .unwrap(),
                 api_key: None,
             },
         );

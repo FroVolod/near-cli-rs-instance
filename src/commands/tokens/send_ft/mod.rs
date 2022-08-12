@@ -93,7 +93,8 @@ impl SendFtCommand {
                 sign_private_key
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config),
+                        self.network.get_connection_config(config.clone()),
+                        self.network.get_network_config(config.clone()),
                     )
                     .await
             }
@@ -101,7 +102,9 @@ impl SendFtCommand {
                 sign_keychain
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config),
+                        self.network.get_connection_config(config.clone()).clone(),
+                        self.network.get_network_config(config.clone()),
+                        config.credentials_home_dir,
                     )
                     .await
             }
@@ -109,7 +112,8 @@ impl SendFtCommand {
                 sign_ledger
                     .process(
                         prepopulated_unsigned_transaction,
-                        self.network.get_connection_config(config),
+                        self.network.get_connection_config(config.clone()),
+                        self.network.get_network_config(config.clone()),
                     )
                     .await
             }

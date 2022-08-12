@@ -50,35 +50,36 @@ impl SignKeychain {
         &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
         network_connection_config: crate::common::ConnectionConfig,
+        network_config: crate::config::NetworkConfig,
+        credentials_home_dir: std::path::PathBuf,
     ) -> crate::CliResult {
         let home_dir = dirs::home_dir().expect("Impossible to get your home dir!");
         let file_name = format!("{}.json", prepopulated_unsigned_transaction.signer_id);
-        let mut path = std::path::PathBuf::from(&home_dir);
+        let mut path = std::path::PathBuf::from(&credentials_home_dir);
 
         let data_path: std::path::PathBuf = {
-            let dir_name = network_connection_config.dir_name();
+            let dir_name = network_config.network_name.as_str();
             path.push(dir_name);
             path.push(file_name);
 
             if path.exists() {
                 path
             } else {
-                let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(
-                    network_connection_config.rpc_url(),
-                )
-                .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-                    block_reference: near_primitives::types::Finality::Final.into(),
-                    request: near_primitives::views::QueryRequest::ViewAccessKeyList {
-                        account_id: prepopulated_unsigned_transaction.signer_id.clone(),
-                    },
-                })
-                .await
-                .map_err(|err| {
-                    color_eyre::Report::msg(format!(
-                        "Failed to fetch query for view key list: {:?}",
-                        err
-                    ))
-                })?;
+                let query_view_method_response =
+                    near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone())
+                        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
+                            block_reference: near_primitives::types::Finality::Final.into(),
+                            request: near_primitives::views::QueryRequest::ViewAccessKeyList {
+                                account_id: prepopulated_unsigned_transaction.signer_id.clone(),
+                            },
+                        })
+                        .await
+                        .map_err(|err| {
+                            color_eyre::Report::msg(format!(
+                                "Failed to fetch query for view key list: {:?}",
+                                err
+                            ))
+                        })?;
                 let access_key_view =
                     if let near_jsonrpc_primitives::types::query::QueryResponseKind::AccessKeyList(
                         result,
@@ -144,7 +145,11 @@ impl SignKeychain {
             submit: self.submit.clone(),
         };
         sign_with_private_key
-            .process(prepopulated_unsigned_transaction, network_connection_config)
+            .process(
+                prepopulated_unsigned_transaction,
+                network_connection_config,
+                network_config,
+            )
             .await
     }
 }

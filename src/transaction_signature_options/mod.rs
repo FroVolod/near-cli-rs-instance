@@ -95,15 +95,15 @@ impl Submit {
     pub async fn process(
         &self,
         network_connection_config: crate::common::ConnectionConfig,
+        network_config: crate::config::NetworkConfig,
         signed_transaction: near_primitives::transaction::SignedTransaction,
         serialize_to_base64: String,
     ) -> crate::CliResult {
         match self {
             Submit::Send => {
                 println!("Transaction sent ...");
-                let json_rcp_client = near_jsonrpc_client::JsonRpcClient::connect(
-                    network_connection_config.rpc_url().as_str(),
-                );
+                let json_rcp_client =
+                    near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.as_str());
                 let transaction_info = loop {
                     let transaction_info_result = json_rcp_client
                         .call(near_jsonrpc_client::methods::broadcast_tx_commit::RpcBroadcastTxCommitRequest{signed_transaction: signed_transaction.clone()})
