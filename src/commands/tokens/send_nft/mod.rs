@@ -8,7 +8,7 @@ pub struct SendNftCommand {
     nft_contract_account_id: crate::types::account_id::AccountId,
     ///What is the receiver account ID?
     receiver_account_id: crate::types::account_id::AccountId,
-    ///Enter an amount NFT to transfer
+    ///Enter an token_id for NFT
     token_id: String,
     #[interactive_clap(long = "prepaid-gas")]
     #[interactive_clap(skip_default_input_arg)]
