@@ -37,7 +37,7 @@ pub enum TokensActions {
     SendFt(self::send_ft::SendFtCommand),
     #[strum_discriminants(strum(message = "The transfer is carried out in NFT tokens"))]
     ///The transfer is carried out in NFT tokens
-    SendNft(self::send_nft::SendNFtCommand),
+    SendNft(self::send_nft::SendNftCommand),
     #[strum_discriminants(strum(message = "View the balance of Near tokens"))]
     ///View the balance of Near tokens
     ViewNearBalance(self::view_near_balance::ViewNearBalance),

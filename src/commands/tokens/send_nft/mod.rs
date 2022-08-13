@@ -3,7 +3,7 @@ use serde_json::json;
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(context = crate::GlobalContext)]
-pub struct SendNFtCommand {
+pub struct SendNftCommand {
     ///What is the nft-contract account ID?
     nft_contract_account_id: crate::types::account_id::AccountId,
     ///What is the receiver account ID?
@@ -23,7 +23,7 @@ pub struct SendNFtCommand {
     network: crate::network_for_transaction::NetworkForTransactionArgs,
 }
 
-impl SendNFtCommand {
+impl SendNftCommand {
     fn input_gas(
         _context: &crate::GlobalContext,
     ) -> color_eyre::eyre::Result<crate::common::NearGas> {
