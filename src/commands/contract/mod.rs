@@ -22,18 +22,17 @@ impl ContractCommands {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Сhoose action for account
 pub enum ContractActions {
-    #[strum_discriminants(strum(message = "Execute function (contract method)"))]
+    #[strum_discriminants(strum(
+        message = "call-function   - Execute function (contract method)"
+    ))]
     ///Execute function (contract method)
     CallFunction(self::call_function::CallFunctionCommands),
-    #[strum_discriminants(strum(message = "Add a new contract code"))]
+    #[strum_discriminants(strum(message = "deploy          - Add a new contract code"))]
     ///Add a contract code
     Deploy(self::deploy::Contract),
-    #[strum_discriminants(strum(message = "Download wasm"))]
+    #[strum_discriminants(strum(message = "download-wasm   - Download wasm"))]
     ///Download wasm
     DownloadWasm(self::download_wasm::DownloadContract),
-    #[strum_discriminants(strum(message = "Inspect storage"))]
-    ///Inspect storage
-    InspectStorage,
 }
 
 impl ContractActions {
@@ -44,7 +43,6 @@ impl ContractActions {
             }
             Self::Deploy(contract) => contract.process(config).await,
             Self::DownloadWasm(download_contract) => download_contract.process(config).await,
-            _ => todo!(),
         }
     }
 }

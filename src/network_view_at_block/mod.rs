@@ -47,27 +47,33 @@ impl NetworkViewAtBlockArgs {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Сhoose block for view
 pub enum ViewAtBlock {
-    #[strum_discriminants(strum(message = "View account properties in the final block"))]
-    ///View account properties in the final block
+    #[strum_discriminants(strum(
+        message = "now               - View properties in the final block"
+    ))]
+    ///View properties in the final block
     Now,
-    #[strum_discriminants(strum(message = "View account properties in the selected block"))]
-    ///View account properties in the selected block
+    #[strum_discriminants(strum(
+        message = "at-block-height   - View properties in a height-selected block"
+    ))]
+    ///View properties in a height-selected block
     AtBlockHeight(AtBlockHeight),
-    #[strum_discriminants(strum(message = "Specify a block ID hash to view this account"))]
-    ///Specify a block ID hash to view this account
+    #[strum_discriminants(strum(
+        message = "at-block-hash     - View properties in a hash-selected block"
+    ))]
+    ///View properties in a hash-selected block
     AtBlockHash(BlockIdHash),
 }
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(context = crate::GlobalContext)]
 pub struct AtBlockHeight {
-    ///Type the block ID height for this account
+    ///Type the block ID height
     block_id_height: near_primitives::types::BlockHeight,
 }
 
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(context = crate::GlobalContext)]
 pub struct BlockIdHash {
-    ///Type the block ID hash for this account
+    ///Type the block ID hash
     block_id_hash: String,
 }

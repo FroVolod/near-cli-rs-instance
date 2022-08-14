@@ -36,10 +36,10 @@ impl CliSkipNextAction {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select an action that you want to add to the action:
 pub enum NextAction {
-    #[strum_discriminants(strum(message = "Select a new action"))]
+    #[strum_discriminants(strum(message = "add-action   - Select a new action"))]
     /// Choose next action
     AddAction(SelectAction),
-    #[strum_discriminants(strum(message = "Skip adding a new action"))]
+    #[strum_discriminants(strum(message = "skip         - Skip adding a new action"))]
     /// Go to transaction signing
     Skip(SkipAction),
 }
@@ -166,30 +166,38 @@ impl SelectAction {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select an action that you want to add to the action:
 pub enum ActionSubcommand {
-    #[strum_discriminants(strum(message = "Transfer tokens"))]
+    #[strum_discriminants(strum(
+        message = "send-near            - The transfer is carried out in NEAR tokens"
+    ))]
     ///Specify data for transfer tokens
-    TransferTokens(self::transfer_tokens::SendNearCommand),
-    #[strum_discriminants(strum(message = "Call the function"))]
+    SendNear(self::transfer_tokens::SendNearCommand),
+    #[strum_discriminants(strum(
+        message = "call-function        - Execute function (contract method)"
+    ))]
     ///Specify data to call the function
     CallFunction(self::call_function::CallFunctionAction),
-    #[strum_discriminants(strum(message = "Stake NEAR Tokens"))]
+    #[strum_discriminants(strum(message = "stake-near-tokens    - Stake NEAR Tokens"))]
     ///Specify data to stake NEAR Tokens
     StakeNearTokens(self::stake_near_tokens::StakeNearTokensAction),
-    #[strum_discriminants(strum(message = "Create a sub-account"))]
+    #[strum_discriminants(strum(message = "create-subaccount    - Create a new sub-account"))]
     ///Specify data to create a sub-account
-    CreateSubAccount(self::create_subaccount::CreateSubAccountAction),
-    #[strum_discriminants(strum(message = "Delete an account"))]
+    CreateSubaccount(self::create_subaccount::CreateSubAccountAction),
+    #[strum_discriminants(strum(message = "delete-account       - Delete an account"))]
     ///Specify data to delete an account
     DeleteAccount(self::delete_account::DeleteAccountAction),
-    #[strum_discriminants(strum(message = "Add an access key to the account"))]
+    #[strum_discriminants(strum(
+        message = "add-key              - Add an access key to an account"
+    ))]
     ///Specify the data to add an access key to the account
-    AddAccessKey(self::add_access_key::AddKeyCommand),
-    #[strum_discriminants(strum(message = "Delete the access key to the account"))]
+    AddKey(self::add_access_key::AddKeyCommand),
+    #[strum_discriminants(strum(
+        message = "delete-key           - Delete an access key from an account"
+    ))]
     ///Specify the data to delete the access key to the account
-    DeleteAccessKey(self::delete_access_key::DeleteKeyCommand),
-    #[strum_discriminants(strum(message = "Deploy the contract code"))]
+    DeleteKey(self::delete_access_key::DeleteKeyCommand),
+    #[strum_discriminants(strum(message = "deploy               - Add a new contract code"))]
     ///Specify the details to deploy the contract code
-    DeployContract(self::deploy_contract::Contract),
+    Deploy(self::deploy_contract::Contract),
 }
 
 impl ActionSubcommand {
@@ -199,7 +207,7 @@ impl ActionSubcommand {
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         match self {
-            ActionSubcommand::TransferTokens(args_transfer) => {
+            ActionSubcommand::SendNear(args_transfer) => {
                 args_transfer
                     .process(config, prepopulated_unsigned_transaction)
                     .await
@@ -214,7 +222,7 @@ impl ActionSubcommand {
                     .process(config, prepopulated_unsigned_transaction)
                     .await
             }
-            ActionSubcommand::CreateSubAccount(args_create_account) => {
+            ActionSubcommand::CreateSubaccount(args_create_account) => {
                 args_create_account
                     .process(config, prepopulated_unsigned_transaction)
                     .await
@@ -224,17 +232,17 @@ impl ActionSubcommand {
                     .process(config, prepopulated_unsigned_transaction)
                     .await
             }
-            ActionSubcommand::AddAccessKey(args_add_key_command) => {
+            ActionSubcommand::AddKey(args_add_key_command) => {
                 args_add_key_command
                     .process(config, prepopulated_unsigned_transaction)
                     .await
             }
-            ActionSubcommand::DeleteAccessKey(args_delete_access_key) => {
+            ActionSubcommand::DeleteKey(args_delete_access_key) => {
                 args_delete_access_key
                     .process(config, prepopulated_unsigned_transaction)
                     .await
             }
-            ActionSubcommand::DeployContract(args_contract_file) => {
+            ActionSubcommand::Deploy(args_contract_file) => {
                 args_contract_file
                     .process(config, prepopulated_unsigned_transaction)
                     .await

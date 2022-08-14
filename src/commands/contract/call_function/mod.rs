@@ -21,10 +21,10 @@ impl CallFunctionCommands {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Сhoose action for account
 pub enum CallFunctionActions {
-    #[strum_discriminants(strum(message = "Calling a view method"))]
+    #[strum_discriminants(strum(message = "as-read-only    - Calling a view method"))]
     ///Calling a view method
     AsReadOnly(self::as_read_only::CallFunctionView),
-    #[strum_discriminants(strum(message = "Calling a change method"))]
+    #[strum_discriminants(strum(message = "as-transaction  - Calling a change method"))]
     ///Calling a change method
     AsTransaction(self::as_transaction::CallFunctionAction),
 }

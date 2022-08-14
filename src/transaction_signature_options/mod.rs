@@ -10,14 +10,20 @@ pub mod sign_with_private_key;
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Select a tool for signing the transaction
 pub enum SignWith {
-    #[strum_discriminants(strum(message = "Sign with keychain"))]
-    ///Sign with keychain
+    #[strum_discriminants(strum(
+        message = "sign-with-keychain   - Sign the transaction with a keychain"
+    ))]
+    ///Sign the transaction with a keychain
     SignWithKeychain(self::sign_with_keychain::SignKeychain),
-    #[strum_discriminants(strum(message = "Sign with ledger"))]
-    ///Sign with ledger
+    #[strum_discriminants(strum(
+        message = "sign-with-ledger     - Sign the transaction with a ledger"
+    ))]
+    ///Sign the transaction with a ledger
     SignWithLedger(self::sign_with_ledger::SignLedger),
-    #[strum_discriminants(strum(message = "Sign with private key"))]
-    ///Sign with private key
+    #[strum_discriminants(strum(
+        message = "sign-with-plaintext-private-key  - Sign the transaction with a plaintext private key"
+    ))]
+    ///Sign the transaction with a plaintext private key
     SignWithPlaintextPrivateKey(self::sign_with_private_key::SignPrivateKey),
 }
 
@@ -61,10 +67,10 @@ pub fn input_block_hash() -> color_eyre::eyre::Result<crate::types::crypto_hash:
 #[derive(Debug, EnumDiscriminants, Clone, clap::Parser, interactive_clap::ToCliArgs)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 pub enum Submit {
-    #[strum_discriminants(strum(message = "I want to send the transaction to the network"))]
+    #[strum_discriminants(strum(message = "send      - Send the transaction to the network"))]
     Send,
     #[strum_discriminants(strum(
-        message = "I only want to print base64-encoded transaction for JSON RPC input and exit"
+        message = "display   - Print only base64 encoded transaction for JSON RPC input and exit"
     ))]
     Display,
 }

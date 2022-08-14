@@ -21,10 +21,12 @@ impl TransactionCommands {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Сhoose action for transaction
 pub enum TransactionActions {
-    #[strum_discriminants(strum(message = "View a transaction status"))]
+    #[strum_discriminants(strum(message = "view-status            - View a transaction status"))]
     ///Execute function (contract method)
     ViewStatus(self::view_status::TransactionInfo),
-    #[strum_discriminants(strum(message = "Construct a new transaction"))]
+    #[strum_discriminants(strum(
+        message = "construct-transaction  - Construct a new transaction"
+    ))]
     ///Construct a new transaction
     ConstructTransaction(TransactionAccounts),
 }

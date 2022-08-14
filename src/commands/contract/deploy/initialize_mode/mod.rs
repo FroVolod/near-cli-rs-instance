@@ -8,11 +8,11 @@ mod call_function_type;
 ///Select the need for initialization
 pub enum InitializeMode {
     /// Add an initialize
-    #[strum_discriminants(strum(message = "Add an initialize"))]
-    Initialize(self::call_function_type::CallFunctionAction),
+    #[strum_discriminants(strum(message = "with-init-call     - Add an initialize"))]
+    WithInitCall(self::call_function_type::CallFunctionAction),
     /// Don't add an initialize
-    #[strum_discriminants(strum(message = "Don't add an initialize"))]
-    NoInitialize(NoInitialize),
+    #[strum_discriminants(strum(message = "without-init-call  - Don't add an initialize"))]
+    WithoutInitCall(NoInitialize),
 }
 
 impl InitializeMode {
@@ -22,12 +22,12 @@ impl InitializeMode {
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
     ) -> crate::CliResult {
         match self {
-            InitializeMode::Initialize(call_function_action) => {
+            InitializeMode::WithInitCall(call_function_action) => {
                 call_function_action
                     .process(config, prepopulated_unsigned_transaction)
                     .await
             }
-            InitializeMode::NoInitialize(no_initialize) => {
+            InitializeMode::WithoutInitCall(no_initialize) => {
                 no_initialize
                     .process(config, prepopulated_unsigned_transaction)
                     .await

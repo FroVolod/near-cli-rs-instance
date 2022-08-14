@@ -29,10 +29,14 @@ impl GenerateKeypair {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 ///Save an access key for this account
 pub enum SaveMode {
-    #[strum_discriminants(strum(message = "Save automatically generated key pair to keychain"))]
+    #[strum_discriminants(strum(
+        message = "save-to-keychain   - Save automatically generated key pair to keychain"
+    ))]
     ///Save automatically generated key pair to keychain
     SaveToKeychain(self::save_keypair_to_keychain::SaveKeypairToKeychain),
-    #[strum_discriminants(strum(message = "Print automatically generated key pair in terminal"))]
+    #[strum_discriminants(strum(
+        message = "print-to-terminal  - Print automatically generated key pair in terminal"
+    ))]
     ///Print automatically generated key pair in terminal
     PrintToTerminal(self::print_keypair_to_terminal::PrintKeypairToTerminal),
 }

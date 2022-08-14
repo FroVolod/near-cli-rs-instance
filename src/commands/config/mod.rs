@@ -21,15 +21,13 @@ impl ConfigCommands {
 #[strum_discriminants(derive(EnumMessage, EnumIter))]
 /// What do you want to do with a near-cli config?
 pub enum ConfigActions {
-    #[strum_discriminants(strum(
-        message = "list             - View a list of network connections"
-    ))]
+    #[strum_discriminants(strum(message = "list        - View a list of network connections"))]
     /// View a list of list of network connections
     List,
-    #[strum_discriminants(strum(message = "add              - Add a network connection"))]
+    #[strum_discriminants(strum(message = "add         - Add a network connection"))]
     ///Add a network connection
     Add(self::add_connection::AddNetworkConnection),
-    #[strum_discriminants(strum(message = "delete           - Delete a network connection"))]
+    #[strum_discriminants(strum(message = "delete      - Delete a network connection"))]
     ///Delete a network connection
     Delete(self::delete_connection::DeleteNetworkConnection),
 }
