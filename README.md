@@ -1,8 +1,6 @@
 near-cli
 --------
 
-This project is still under development. Production-ready `NEAR CLI` can be found [here](https://github.com/near/near-cli).
-
 near-cli is a command line utility for working with the Near Protocol blockchain. 
 
 <p>
