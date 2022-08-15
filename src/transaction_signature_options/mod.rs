@@ -11,12 +11,12 @@ pub mod sign_with_private_key;
 ///Select a tool for signing the transaction
 pub enum SignWith {
     #[strum_discriminants(strum(
-        message = "sign-with-keychain   - Sign the transaction with a keychain"
+        message = "sign-with-keychain               - Sign the transaction with a keychain"
     ))]
     ///Sign the transaction with a keychain
     SignWithKeychain(self::sign_with_keychain::SignKeychain),
     #[strum_discriminants(strum(
-        message = "sign-with-ledger     - Sign the transaction with a ledger"
+        message = "sign-with-ledger                 - Sign the transaction with a ledger"
     ))]
     ///Sign the transaction with a ledger
     SignWithLedger(self::sign_with_ledger::SignLedger),
@@ -125,7 +125,7 @@ impl Submit {
                         },
                     };
                 };
-                println!("{:#?}", transaction_info);
+                crate::common::print_transaction_status(transaction_info, network_config);
                 Ok(())
             }
             Submit::Display => {
