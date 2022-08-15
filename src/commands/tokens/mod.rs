@@ -30,17 +30,17 @@ impl TokensCommands {
 ///Select actions with tokens
 pub enum TokensActions {
     #[strum_discriminants(strum(
-        message = "send-near    - The transfer is carried out in NEAR tokens"
+        message = "send-near         - The transfer is carried out in NEAR tokens"
     ))]
     ///The transfer is carried out in NEAR tokens
     SendNear(self::send_near::SendNearCommand),
     #[strum_discriminants(strum(
-        message = "send-ft      - The transfer is carried out in FT tokens"
+        message = "send-ft           - The transfer is carried out in FT tokens"
     ))]
     ///The transfer is carried out in FT tokens
     SendFt(self::send_ft::SendFtCommand),
     #[strum_discriminants(strum(
-        message = "send-nft     - The transfer is carried out in NFT tokens"
+        message = "send-nft          - The transfer is carried out in NFT tokens"
     ))]
     ///The transfer is carried out in NFT tokens
     SendNft(self::send_nft::SendNftCommand),
