@@ -145,7 +145,6 @@ impl SignKeychain {
         sign_with_private_key
             .process(
                 prepopulated_unsigned_transaction,
-                // network_connection_config,
                 network_config,
             )
             .await

@@ -38,31 +38,33 @@ pub fn input_signer_private_key() -> color_eyre::eyre::Result<crate::types::secr
         .with_prompt("Enter sender (signer) private (secret) key")
         .interact_text()?)
 }
+//-----------------------------------------------------------------------------------
+//---- these functions are used for offline mode ----
+// pub fn input_access_key_nonce(public_key: &str) -> color_eyre::eyre::Result<u64> {
+//     println!("Your public key: `{}`", public_key);
+//     Ok(Input::new()
+//         .with_prompt(
+//             "Enter transaction nonce for this public key (query the access key information with \
+//             `./near-cli view nonce \
+//                 network testnet \
+//                 account 'volodymyr.testnet' \
+//                 public-key ed25519:...` incremented by 1)",
+//         )
+//         .interact_text()?)
+// }
 
-pub fn input_access_key_nonce(public_key: &str) -> color_eyre::eyre::Result<u64> {
-    println!("Your public key: `{}`", public_key);
-    Ok(Input::new()
-        .with_prompt(
-            "Enter transaction nonce for this public key (query the access key information with \
-            `./near-cli view nonce \
-                network testnet \
-                account 'volodymyr.testnet' \
-                public-key ed25519:...` incremented by 1)",
-        )
-        .interact_text()?)
-}
-
-pub fn input_block_hash() -> color_eyre::eyre::Result<crate::types::crypto_hash::CryptoHash> {
-    let input_block_hash: crate::common::BlockHashAsBase58 = Input::new()
-        .with_prompt(
-            "Enter recent block hash (query information about the hash of the last block with \
-            `./near-cli view recent-block-hash network testnet`)",
-        )
-        .interact_text()?;
-    Ok(crate::types::crypto_hash::CryptoHash(
-        input_block_hash.inner,
-    ))
-}
+// pub fn input_block_hash() -> color_eyre::eyre::Result<crate::types::crypto_hash::CryptoHash> {
+//     let input_block_hash: crate::common::BlockHashAsBase58 = Input::new()
+//         .with_prompt(
+//             "Enter recent block hash (query information about the hash of the last block with \
+//             `./near-cli view recent-block-hash network testnet`)",
+//         )
+//         .interact_text()?;
+//     Ok(crate::types::crypto_hash::CryptoHash(
+//         input_block_hash.inner,
+//     ))
+// }
+//-----------------------------------------------------------------------------------
 
 #[derive(Debug, EnumDiscriminants, Clone, clap::Parser, interactive_clap::ToCliArgs)]
 #[strum_discriminants(derive(EnumMessage, EnumIter))]

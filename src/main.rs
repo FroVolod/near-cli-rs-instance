@@ -1,5 +1,4 @@
 use common::{try_external_subcommand_execution, CliResult};
-use std::io::Write;
 
 mod commands;
 mod common;
