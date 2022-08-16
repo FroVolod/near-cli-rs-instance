@@ -4,7 +4,6 @@ use std::io::Write;
 mod commands;
 mod common;
 mod config;
-mod consts;
 mod network_for_transaction;
 mod network_view_at_block;
 mod transaction_signature_options;
