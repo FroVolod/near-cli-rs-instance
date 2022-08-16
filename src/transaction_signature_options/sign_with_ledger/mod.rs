@@ -20,7 +20,7 @@ pub struct SignLedger {
     #[interactive_clap(skip_default_input_arg)]
     block_hash: Option<String>,
     #[interactive_clap(subcommand)]
-    submit: super::Submit,
+    submit: Option<super::Submit>,
 }
 
 impl SignLedger {
@@ -55,13 +55,9 @@ impl SignLedger {
                 public_key.to_bytes(),
             ))
             .into();
-        let submit: super::Submit = match optional_clap_variant
+        let submit: Option<super::Submit> = optional_clap_variant
             .clone()
-            .and_then(|clap_variant| clap_variant.submit)
-        {
-            Some(submit) => submit,
-            None => super::Submit::choose_submit(),
-        };
+            .and_then(|clap_variant| clap_variant.submit);
         Ok(Self {
             seed_phrase_hd_path,
             signer_public_key,
@@ -150,8 +146,18 @@ impl SignLedger {
                 .expect("Transaction is not expected to fail on serialization"),
         );
         println!("Your transaction was signed successfully.");
-        self.submit
-            .process(network_config, signed_transaction, serialize_to_base64)
-            .await
+        match self.submit.clone() {
+            None => {
+                let submit = super::Submit::choose_submit();
+                submit
+                    .process(network_config, signed_transaction, serialize_to_base64)
+                    .await
+            }
+            Some(submit) => {
+                submit
+                    .process(network_config, signed_transaction, serialize_to_base64)
+                    .await
+            }
+        }
     }
 }

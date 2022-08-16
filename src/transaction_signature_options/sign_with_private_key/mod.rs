@@ -21,7 +21,7 @@ pub struct SignPrivateKey {
     #[interactive_clap(skip_default_input_arg)]
     pub block_hash: Option<String>,
     #[interactive_clap(subcommand)]
-    pub submit: super::Submit,
+    pub submit: Option<super::Submit>,
 }
 
 impl SignPrivateKey {
@@ -43,13 +43,9 @@ impl SignPrivateKey {
             Some(signer_private_key) => signer_private_key,
             None => super::input_signer_private_key()?,
         };
-        let submit: super::Submit = match optional_clap_variant
+        let submit: Option<super::Submit> = optional_clap_variant
             .clone()
-            .and_then(|clap_variant| clap_variant.submit)
-        {
-            Some(submit) => submit,
-            None => super::Submit::choose_submit(),
-        };
+            .and_then(|clap_variant| clap_variant.submit);
         Ok(Self {
             signer_public_key,
             signer_private_key,
@@ -106,11 +102,22 @@ impl SignPrivateKey {
                 .try_to_vec()
                 .expect("Transaction is not expected to fail on serialization"),
         );
-        println!("\nSigned transaction:\n");
+        println!("\nYour transaction was signed successfully.");
+        println!("Signed transaction:\n");
         crate::common::print_transaction(signed_transaction.transaction.clone());
-        println!("Your transaction was signed successfully.");
-        self.submit
-            .process(network_config, signed_transaction, serialize_to_base64)
-            .await
+        println!();
+        match self.submit.clone() {
+            None => {
+                let submit = super::Submit::choose_submit();
+                submit
+                    .process(network_config, signed_transaction, serialize_to_base64)
+                    .await
+            }
+            Some(submit) => {
+                submit
+                    .process(network_config, signed_transaction, serialize_to_base64)
+                    .await
+            }
+        }
     }
 }

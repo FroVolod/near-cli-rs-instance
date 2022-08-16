@@ -15,7 +15,7 @@ pub struct SignKeychain {
     #[interactive_clap(skip_default_input_arg)]
     block_hash: Option<String>,
     #[interactive_clap(subcommand)]
-    submit: super::Submit,
+    submit: Option<super::Submit>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -30,13 +30,9 @@ impl SignKeychain {
         optional_clap_variant: Option<<SignKeychain as interactive_clap::ToCli>::CliVariant>,
         _context: crate::GlobalContext,
     ) -> color_eyre::eyre::Result<Self> {
-        let submit: super::Submit = match optional_clap_variant
+        let submit: Option<super::Submit> = optional_clap_variant
             .clone()
-            .and_then(|clap_variant| clap_variant.submit)
-        {
-            Some(submit) => submit,
-            None => super::Submit::choose_submit(),
-        };
+            .and_then(|clap_variant| clap_variant.submit);
         Ok(Self {
             nonce: None,
             block_hash: None,
@@ -143,10 +139,7 @@ impl SignKeychain {
             submit: self.submit.clone(),
         };
         sign_with_private_key
-            .process(
-                prepopulated_unsigned_transaction,
-                network_config,
-            )
+            .process(prepopulated_unsigned_transaction, network_config)
             .await
     }
 }
