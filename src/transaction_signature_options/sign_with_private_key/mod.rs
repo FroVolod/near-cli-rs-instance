@@ -74,6 +74,9 @@ impl SignPrivateKey {
                 })
                 .await
                 .map_err(|err| {
+                    println!("\nUnsigned transaction:\n");
+                    crate::common::print_transaction(prepopulated_unsigned_transaction.clone());
+                    println!("\nYour transaction was not successfully signed.\n");
                     color_eyre::Report::msg(format!(
                         "Failed to fetch public key information for nonce: {:?}",
                         err
