@@ -52,9 +52,12 @@ impl ViewFtBalance {
             serde_json::from_slice(&call_result)
                 .map_err(|err| color_eyre::Report::msg(format!("serde json: {:?}", err)))?
         };
-        println!("--------------");
-        println!();
-        println!("{}", serde_json::to_string_pretty(&serde_call_result)?);
+        println!(
+            "\n{} account has {} FT tokens (FT-contract: {})",
+            owner_account_id.to_string(),
+            serde_json::to_string_pretty(&serde_call_result)?,
+            self.ft_contract_account_id
+        );
         Ok(())
     }
 }

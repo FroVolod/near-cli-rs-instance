@@ -52,8 +52,7 @@ impl ViewNftAssets {
             serde_json::from_slice(&call_result)
                 .map_err(|err| color_eyre::Report::msg(format!("serde json: {:?}", err)))?
         };
-        println!("--------------");
-        println!();
+        println!("\n{} account has NFT tokens:", owner_account_id.to_string());
         println!("{}", serde_json::to_string_pretty(&serde_call_result)?);
         Ok(())
     }

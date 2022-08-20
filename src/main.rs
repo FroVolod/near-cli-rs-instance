@@ -57,10 +57,14 @@ fn main() -> CliResult {
         .unwrap()
         .block_on(cmd.process(config));
 
-    println!(
-        "Your console command:\n./near-cli {}",
-        shell_words::join(&completed_cli.to_cli_args())
-    );
-
-    process_result
+    match process_result {
+        Result::Ok(()) => {
+            println!(
+                "Your console command:\n./near-cli {}",
+                shell_words::join(&completed_cli.to_cli_args())
+            );
+            Ok(())
+        },
+        Result::Err(err) => Result::Err(err)
+    } 
 }
