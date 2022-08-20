@@ -1,7 +1,7 @@
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Config {
     pub credentials_home_dir: std::path::PathBuf,
-    pub networks: std::collections::HashMap<String, NetworkConfig>,
+    pub networks: linked_hash_map::LinkedHashMap<String, NetworkConfig>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -19,7 +19,7 @@ impl Default for Config {
         let mut credentials_home_dir = std::path::PathBuf::from(&home_dir);
         credentials_home_dir.push(".near-credentials");
 
-        let mut networks = std::collections::HashMap::new();
+        let mut networks = linked_hash_map::LinkedHashMap::new();
         networks.insert(
             "mainnet".to_string(),
             NetworkConfig {
@@ -45,12 +45,12 @@ impl Default for Config {
             },
         );
         networks.insert(
-            "betanet".to_string(),
+            "shardnet".to_string(),
             NetworkConfig {
-                network_name: "betanet".to_string(),
-                rpc_url: "https://rpc.betanet.near.org".parse().unwrap(),
-                wallet_url: "https://wallet.betanet.near.org".parse().unwrap(),
-                explorer_transaction_url: "https://explorer.betanet.near.org/transactions/"
+                network_name: "shardnet".to_string(),
+                rpc_url: "https://rpc.shardnet.near.org".parse().unwrap(),
+                wallet_url: "https://wallet.shardnet.near.org".parse().unwrap(),
+                explorer_transaction_url: "https://explorer.shardnet.near.org/transactions/"
                     .parse()
                     .unwrap(),
                 api_key: None,
