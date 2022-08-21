@@ -32,7 +32,7 @@ pub enum ContractActions {
     Deploy(self::deploy::Contract),
     #[strum_discriminants(strum(message = "download-wasm   - Download wasm"))]
     ///Download wasm
-    DownloadWasm(self::download_wasm::DownloadContract),
+    DownloadWasm(self::download_wasm::ContractAccount),
 }
 
 impl ContractActions {
