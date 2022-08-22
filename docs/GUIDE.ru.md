@@ -689,7 +689,7 @@ fro_volod.testnet account has NFT tokens:
 </a>
 </details>
 
-##### as-transaction  - Calling a change method
+##### as-transaction - Calling a change method
 
 Для выполнения этой команды необходимо ввести в командной строке терминала:
 ```txt
