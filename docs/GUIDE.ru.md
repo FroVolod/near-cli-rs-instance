@@ -1002,7 +1002,7 @@ Transaction status: FinalExecutionOutcomeWithReceiptView {
 
 
 
-### Helpers
+<!-- ### Helpers
 
 #### Generate a key pair
 
@@ -1039,7 +1039,7 @@ Transaction status: FinalExecutionOutcomeWithReceiptView {
 <a href="https://asciinema.org/a/HfsutLZKnWS8w1PnY1kGIUYid?autoplay=1&t=1&speed=2">
     <img src="https://asciinema.org/a/HfsutLZKnWS8w1PnY1kGIUYid.png" width="836"/>
 </a>
-</details>
+</details> -->
 
 
 
