@@ -428,7 +428,6 @@ https://explorer.testnet.near.org/transactions/6S7bJ76QNFypUvP7PCB1hkLM7X5GxPxP2
 </details>
 
 ### tokens - Manage token assets such as NEAR, FT, NFT
-- [account](#account---Manage-accounts-view-account-summary-login-create-subaccount-implicit-account-delete-account-list-key-add-key-delete-key)
 - [send-near](#send-near---The-transfer-is-carried-out-in-NEAR-tokens)
 - [send-ft](#send-ft---The-transfer-is-carried-out-in-FT-tokens)
 - [send-nft](#send-nft---The-transfer-is-carried-out-in-NFT-tokens)
