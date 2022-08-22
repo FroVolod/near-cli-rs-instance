@@ -75,12 +75,12 @@
 
 ### Группы команд
 
-- [account](#account---Manage-accounts-view-account-summary-login-create-subaccount-implicit-account-delete-account-list-key-add-key-delete-key)
+- [account](#account---Manage-accounts)
 - [tokens](#tokens---Manage-token-assets-such-as-NEAR-FT-NFT)
 - [contract](#contract---Manage-smart-contracts-deploy-code-call-functions)
 - [transaction](#transaction---Operate-transactions)
 
-### account - Manage accounts (view-account-summary, login, create-subaccount, implicit-account, delete-account, list-key, add-key, delete-key)
+### account - Manage accounts
 
 Просмотреть сведения об аккаунте ([View properties for an account](#view-account-summary---view-properties-for-an-account)) и просмотреть ключи доступа к аккаунту ([View a list of access keys of an account](#list-keys---View-a-list-of-access-keys-of-an-account)) возможно в режиме реального времени (**at-final-block**) и режиме архивных данных (**at-block-height**, **at-block-hash**). На примерах ниже показаны варианты применения этих режимов.
 
