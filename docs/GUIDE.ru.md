@@ -79,9 +79,6 @@
 - [tokens](#tokens---Manage-token-assets-such-as-NEAR-FT-NFT)
 - [contract](#contract---Manage-smart-contracts-deploy-code-call-functions)
 - [transaction](#transaction---Operate-transactions)
-- [Delete access key, account](#delete-access-key-account)
-- [Construct a new transaction](#construct-a-new-transaction)
-- [Helpers](#helpers)
 
 ### account - Manage accounts (view-account-summary, login, create-subaccount, implicit-account, delete-account, list-key, add-key, delete-key)
 
