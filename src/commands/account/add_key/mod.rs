@@ -47,12 +47,12 @@ pub enum AccessKeyPermission {
     #[strum_discriminants(strum(
         message = "grant-full-access           - A permission with full access"
     ))]
-    /// Provide data for a full access key
+    ///Provide data for a full access key
     GrantFullAccess(self::access_key_type::FullAccessType),
     #[strum_discriminants(strum(
         message = "grant-function-call-access  - A permission with function call"
     ))]
-    /// Provide data for a function-call access key
+    ///Provide data for a function-call access key
     GrantFunctionCallAccess(self::access_key_type::FunctionCallType),
 }
 
