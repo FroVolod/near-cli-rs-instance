@@ -82,7 +82,7 @@
 
 ### account - Manage accounts
 
-Просмотреть сведения об аккаунте ([View properties for an account](#view-account-summary---view-properties-for-an-account)) и просмотреть ключи доступа к аккаунту ([View a list of access keys of an account](#list-keys---View-a-list-of-access-keys-of-an-account)) возможно в режиме реального времени (**at-final-block**) и режиме архивных данных (**at-block-height**, **at-block-hash**). На примерах ниже показаны варианты применения этих режимов.
+Просмотреть сведения об аккаунте ([View properties for an account](#view-account-summary---view-properties-for-an-account)) и просмотреть ключи доступа к аккаунту ([View a list of access keys of an account](#list-keys---View-a-list-of-access-keys-of-an-account)) возможно в режиме реального времени (**now**) и режиме архивных данных (**at-block-height**, **at-block-hash**). На примерах ниже показаны варианты применения этих режимов.
 
 - [view-account-summary](#view-account-summary---View-properties-for-an-account)
 - [login](#login---Log-in-with-NEAR-Wallet-authorization)
