@@ -87,6 +87,7 @@
 - [view-account-summary](#view-account-summary---View-properties-for-an-account)
 - [login](#login---Log-in-with-NEAR-Wallet-authorization)
 - [create-subaccount](#create-subaccount---Create-a-new-sub-account)
+- [create-implicit-account](#create-implicit-account---Create-an-implicit-account)
 - [delete-account](#delete-account---Delete-an-account)
 - [list-keys](#list-keys---View-a-list-of-access-keys-of-an-account)
 - [add-key](#add-key---Add-an-access-key-to-an-account)
@@ -94,7 +95,11 @@
 
 #### view-account-summary - View properties for an account
 
-##### at-final-block
+- [now](#now---View-properties-in-the-final-block)
+- [at-block-height](#at-block-height---View-properties-in-a-height-selected-block)
+- [at-block-hash](#at-block-hash---View-properties-in-a-hash-selected-block)
+
+##### now - View properties in the final block
 
 Для просмотра сведений об аккаунте на последнем блоке необходимо ввести в командной строке терминала:
 
@@ -137,7 +142,7 @@ Number of access keys: 14
 </a>
 </details>
 
-##### at-block-height
+##### at-block-height - View properties in a height-selected block
 
 Для просмотра сведений об аккаунте на конктретном блоке необходимо ввести в командной строке терминала:
 ```txt
@@ -177,7 +182,7 @@ Number of access keys: 12
 </a>
 </details>
 
-##### at-block-hash
+##### at-block-hash - View properties in a hash-selected block
 
 Для просмотра сведений об аккаунте необходимо ввести в командной строке терминала:
 ```txt
@@ -248,6 +253,59 @@ https://explorer.testnet.near.org/transactions/82i7DWkAvVQFM2C1afaYhyPuZmr5DVeC4
 <details><summary><i>Демонстрация работы команды в интерактивном режиме</i></summary>
 <a href="https://asciinema.org/a/NjpfOJDMlOrr7chIyYrWCZAzH?autoplay=1&t=1&speed=2">
     <img src="https://asciinema.org/a/NjpfOJDMlOrr7chIyYrWCZAzH.png" width="836"/>
+</a>
+</details>
+
+#### create-implicit-account - Create an implicit-account
+
+- [use-auto-generation](#use-auto-generation---Use-auto-generation-to-create-an-implicit-account)
+- [use-ledger](#use-ledger---Use-ledger-to-create-an-implicit-account)
+
+##### use-auto-generation - Use auto-generation to create an implicit account
+
+Данная команда автоматически генерирует аккаунт с ключами доступа и сохраняет их в файле с именем implicit-account-id.
+Для выполнения этой команды необходимо ввести в командной строке терминала:
+```txt
+./near-cli account \
+    create-implicit-account \
+    use-auto-generation \
+    save-to-folder /Users/frovolod/.near-credentials/implicit
+```
+
+<details><summary><i>Результат выполнения команды</i></summary>
+
+```txt
+The file "/Users/frovolod/.near-credentials/implicit/38a078c59b84e49e01b42ae79c77992b86dd1204c79cac688401a33045199441.json" was saved successfully
+```
+</details>
+
+<details><summary><i>Демонстрация работы команды в интерактивном режиме</i></summary>
+<a href="https://asciinema.org/a/wvItMyT51nBKAbnlhW7D13reT?autoplay=1&t=1&speed=2">
+    <img src="https://asciinema.org/a/wvItMyT51nBKAbnlhW7D13reT.png" width="836"/>
+</a>
+</details>
+
+##### use-ledger - Use ledger to create an implicit account
+
+Данная команда с помощью леджера создает аккаунт с ключами доступа и сохраняет их в файле с именем implicit-account-id.
+Для выполнения этой команды необходимо ввести в командной строке терминала:
+```txt
+./near-cli account \
+    create-implicit-account \
+    use-ledger \
+    save-to-folder /Users/frovolod/.near-credentials/implicit/ledger
+```
+
+<details><summary><i>Результат выполнения команды</i></summary>
+
+```txt
+The file "/Users/frovolod/.near-credentials/implicit/ledger/739c872c3057cd5d812c49345248b9fdd318c8ad33ace6cf0468109eae972c8e.json" was saved successfully
+```
+</details>
+
+<details><summary><i>Демонстрация работы команды в интерактивном режиме</i></summary>
+<a href="https://asciinema.org/a/kL5x9MXNrlSZWS83YjVkxnsf7?autoplay=1&t=1&speed=2">
+    <img src="https://asciinema.org/a/kL5x9MXNrlSZWS83YjVkxnsf7.png" width="836"/>
 </a>
 </details>
 
@@ -1119,27 +1177,6 @@ recent block hash: `CDgRvkv2qv2c8e5m2WDKFUFqAtXrq2fiUteM6XHpy58t`
 
 
 
-#### Add an implicit-account
-
-Данная команда автоматически генерирует ключи доступа и сохраняет их в файле.
-Для выполнения этой команды необходимо ввести в командной строке терминала:
-```txt
-./near-cli add implicit-account \
-        generate-keypair
-```
-
-<details><summary><i>Результат выполнения команды</i></summary>
-
-```txt
-The data for the access key is saved in a file /Users/frovolod/.near-credentials/default/cbb8d84ac58503f2a53e07830008531a8480b8dd42db045316cd89c87d2b4862.json
-```
-</details>
-
-<details><summary><i>Демонстрация работы команды в интерактивном режиме</i></summary>
-<a href="https://asciinema.org/a/Ub5Q13ZEKfzG4I0yKd0zinFjr?autoplay=1&t=1&speed=1">
-    <img src="https://asciinema.org/a/Ub5Q13ZEKfzG4I0yKd0zinFjr.png" width="836"/>
-</a>
-</details>
 
 #### Add a new stake proposal
 
