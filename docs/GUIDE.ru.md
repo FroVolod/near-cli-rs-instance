@@ -222,6 +222,30 @@ Number of access keys: 12
 </a>
 </details>
 
+#### login - Log in with NEAR Wallet authorization
+
+Для авторизации пользователя необходимо ввести в командной строке терминала:
+```txt
+./near-cli account \
+    import-account \
+    network testnet
+```
+
+Вы будете перенаправлены браузер для авторизации. После успешной авторизации в "NEAR Wallet" необходимо вернуться в терминал и ввести имя пользователя.
+<details><summary><i>Результат выполнения команды</i></summary>
+
+```txt
+The data for the access key is saved in a file /Users/frovolod/.near-credentials/testnet/fro_volod.testnet/ed25519_GicfpXn1Ebb71gkBAoXKsoU1Nwv2hBppiMexxSFRHjyM.json
+The file: /Users/frovolod/.near-credentials/testnet/fro_volod.testnet.json already exists! Therefore it was not overwritten.
+```
+</details>
+
+<details><summary><i>Демонстрация работы команды в интерактивном режиме</i></summary>
+<a href="https://asciinema.org/a/ham4fYGgVjOJq3U2gfwwySIvj?autoplay=1&t=1&speed=2">
+    <img src="https://asciinema.org/a/ham4fYGgVjOJq3U2gfwwySIvj.png" width="836"/>
+</a>
+</details>
+
 #### create-subaccount - Create a new sub-account
 
 Для создания суб-аккаунта необходимо ввести в командной строке терминала:
