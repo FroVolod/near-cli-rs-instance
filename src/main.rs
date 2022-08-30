@@ -3,6 +3,7 @@ use common::{try_external_subcommand_execution, CliResult};
 mod commands;
 mod common;
 mod config;
+mod network;
 mod network_for_transaction;
 mod network_view_at_block;
 mod transaction_signature_options;

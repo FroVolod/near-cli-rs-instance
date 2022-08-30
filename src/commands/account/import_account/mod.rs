@@ -4,22 +4,14 @@ use std::str::FromStr;
 #[derive(Debug, Clone, interactive_clap::InteractiveClap)]
 #[interactive_clap(context = crate::GlobalContext)]
 pub struct Login {
-    ///What is the name of the network
-    #[interactive_clap(skip_default_input_arg)]
-    network_name: String,
+    #[interactive_clap(named_arg)]
+    ///Select network
+    network: crate::network::Network,
 }
 
 impl Login {
-    fn input_network_name(context: &crate::GlobalContext) -> color_eyre::eyre::Result<String> {
-        crate::common::input_network_name(context)
-    }
-
     pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
-        let networks = config.networks;
-        let network_config = networks
-            .get(self.network_name.as_str())
-            .expect("Impossible to get network name!")
-            .clone();
+        let network_config = self.network.get_network_config(config.clone());
         login(network_config, config.credentials_home_dir).await
     }
 }
