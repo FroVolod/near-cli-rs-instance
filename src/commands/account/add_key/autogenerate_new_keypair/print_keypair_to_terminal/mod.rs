@@ -2,7 +2,7 @@
 #[interactive_clap(context = crate::GlobalContext)]
 pub struct PrintKeypairToTerminal {
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_for_transaction::NetworkForTransactionArgs,
 }
 

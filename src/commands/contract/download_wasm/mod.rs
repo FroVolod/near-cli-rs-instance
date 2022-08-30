@@ -26,7 +26,7 @@ pub struct DownloadContract {
     ///Where to download the contract file?
     folder_path: crate::types::path_buf::PathBuf,
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_view_at_block::NetworkViewAtBlockArgs,
 }
 

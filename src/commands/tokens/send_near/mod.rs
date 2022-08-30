@@ -9,7 +9,7 @@ pub struct SendNearCommand {
     ///Enter an amount to transfer
     amount_in_near: crate::common::NearBalance,
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_for_transaction::NetworkForTransactionArgs,
 }
 

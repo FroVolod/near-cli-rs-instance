@@ -6,7 +6,7 @@ pub struct AddAccessWithSeedPhraseAction {
     ///Enter the seed-phrase for this sub-account
     master_seed_phrase: String,
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_for_transaction::NetworkForTransactionArgs,
 }
 

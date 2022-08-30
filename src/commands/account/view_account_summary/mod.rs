@@ -4,7 +4,7 @@ pub struct ViewAccountSummary {
     ///What Account ID do you need to view?
     account_id: crate::types::account_id::AccountId,
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_view_at_block::NetworkViewAtBlockArgs,
 }
 

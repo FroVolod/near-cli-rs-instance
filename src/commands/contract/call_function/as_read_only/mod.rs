@@ -8,7 +8,7 @@ pub struct CallFunctionView {
     ///Enter arguments to this function
     function_args: String,
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_view_at_block::NetworkViewAtBlockArgs,
 }
 

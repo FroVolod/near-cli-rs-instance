@@ -20,7 +20,7 @@ pub struct CallFunctionAction {
     ///What is the signer account ID?
     signer_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_for_transaction::NetworkForTransactionArgs,
 }
 

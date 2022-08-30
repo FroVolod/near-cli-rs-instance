@@ -6,7 +6,7 @@ pub struct ViewNftAssets {
     ///What is the nft-contract account ID?
     nft_contract_account_id: crate::types::account_id::AccountId,
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_view_at_block::NetworkViewAtBlockArgs,
 }
 

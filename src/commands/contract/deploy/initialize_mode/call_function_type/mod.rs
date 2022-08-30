@@ -16,7 +16,7 @@ pub struct CallFunctionAction {
     ///Enter deposit for a function call
     deposit: crate::common::NearBalance,
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_for_transaction::NetworkForTransactionArgs,
 }
 

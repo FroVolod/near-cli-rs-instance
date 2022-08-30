@@ -2,7 +2,7 @@
 #[interactive_clap(context = crate::GlobalContext)]
 pub struct ViewNearBalance {
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_view_at_block::NetworkViewAtBlockArgs,
 }
 

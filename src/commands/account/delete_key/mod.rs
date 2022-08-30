@@ -6,7 +6,7 @@ pub struct DeleteKeyCommand {
     ///Enter the public key You wish to delete
     public_key: crate::types::public_key::PublicKey,
     #[interactive_clap(named_arg)]
-    ///Select online mode
+    ///Select network
     network: crate::network_for_transaction::NetworkForTransactionArgs,
 }
 
