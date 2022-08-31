@@ -29,15 +29,15 @@ impl SignKeychain {
     pub fn from_cli(
         optional_clap_variant: Option<<SignKeychain as interactive_clap::ToCli>::CliVariant>,
         _context: crate::GlobalContext,
-    ) -> color_eyre::eyre::Result<Self> {
+    ) -> color_eyre::eyre::Result<Option<Self>> {
         let submit: Option<super::Submit> = optional_clap_variant
             .clone()
             .and_then(|clap_variant| clap_variant.submit);
-        Ok(Self {
+        Ok(Some(Self {
             nonce: None,
             block_hash: None,
             submit,
-        })
+        }))
     }
 }
 

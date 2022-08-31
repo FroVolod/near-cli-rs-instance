@@ -23,7 +23,7 @@ impl AddNetworkConnection {
             <AddNetworkConnection as interactive_clap::ToCli>::CliVariant,
         >,
         context: crate::GlobalContext,
-    ) -> color_eyre::eyre::Result<Self> {
+    ) -> color_eyre::eyre::Result<Option<Self>> {
         let network_name = match optional_clap_variant
             .clone()
             .and_then(|clap_variant| clap_variant.network_name)
@@ -59,13 +59,13 @@ impl AddNetworkConnection {
             Some(cli_api_key) => Some(cli_api_key),
             None => Self::input_api_key()?,
         };
-        Ok(Self {
+        Ok(Some(Self {
             network_name,
             rpc_url,
             wallet_url,
             explorer_transaction_url,
             api_key,
-        })
+        }))
     }
 
     fn input_api_key() -> color_eyre::eyre::Result<Option<String>> {

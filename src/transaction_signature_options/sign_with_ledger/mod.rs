@@ -27,7 +27,7 @@ impl SignLedger {
     pub fn from_cli(
         optional_clap_variant: Option<<SignLedger as interactive_clap::ToCli>::CliVariant>,
         _context: crate::GlobalContext,
-    ) -> color_eyre::eyre::Result<Self> {
+    ) -> color_eyre::eyre::Result<Option<Self>> {
         let seed_phrase_hd_path = match optional_clap_variant
             .clone()
             .and_then(|clap_variant| clap_variant.seed_phrase_hd_path)
@@ -58,13 +58,13 @@ impl SignLedger {
         let submit: Option<super::Submit> = optional_clap_variant
             .clone()
             .and_then(|clap_variant| clap_variant.submit);
-        Ok(Self {
+        Ok(Some(Self {
             seed_phrase_hd_path,
             signer_public_key,
             nonce: None,
             block_hash: None,
             submit,
-        })
+        }))
     }
 
     pub fn input_seed_phrase_hd_path() -> crate::types::slip10::BIP32Path {
