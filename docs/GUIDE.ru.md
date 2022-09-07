@@ -702,7 +702,7 @@ fro_volod.testnet account has NFT tokens:
 
 ##### as-read-only - Calling a view method
 
-Режимами реального времени (**at-final-block**) и архивных данных (**at-block-height**, **at-block-hash**) следует пользоваться аналогично просмотру сведений об аккаунте ([View properties for an account](#view-properties-for-an-account)).
+Режимами реального времени (**at-final-block**) и архивных данных (**at-block-height**, **at-block-hash**) следует пользоваться аналогично просмотру сведений об аккаунте ([View properties for an account](#view-account-summary---view-properties-for-an-account)).
 
 Для выполнения этой команды необходимо ввести в командной строке терминала:
 ```txt
@@ -819,7 +819,7 @@ https://explorer.testnet.near.org/transactions/4YGGhF88aevNGpF5uaXNGHfQprHRqkia7
 
 #### download-wasm - Download wasm
 
-Режимами реального времени (**at-final-block**) и архивных данных (**at-block-height**, **at-block-hash**) следует пользоваться аналогично просмотру сведений об аккаунте ([View properties for an account](#view-properties-for-an-account)).
+Режимами реального времени (**at-final-block**) и архивных данных (**at-block-height**, **at-block-hash**) следует пользоваться аналогично просмотру сведений об аккаунте ([View properties for an account](#view-account-summary---view-properties-for-an-account)).
 
 Для получения файла контракта необходимо ввести в командной строке терминала:
 
