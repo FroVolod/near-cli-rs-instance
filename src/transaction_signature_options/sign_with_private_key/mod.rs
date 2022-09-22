@@ -28,7 +28,7 @@ impl SignPrivateKey {
     pub fn from_cli(
         optional_clap_variant: Option<<SignPrivateKey as interactive_clap::ToCli>::CliVariant>,
         _context: crate::GlobalContext,
-    ) -> color_eyre::eyre::Result<Self> {
+    ) -> color_eyre::eyre::Result<Option<Self>> {
         let signer_public_key: crate::types::public_key::PublicKey = match optional_clap_variant
             .clone()
             .and_then(|clap_variant| clap_variant.signer_public_key)
@@ -46,13 +46,13 @@ impl SignPrivateKey {
         let submit: Option<super::Submit> = optional_clap_variant
             .clone()
             .and_then(|clap_variant| clap_variant.submit);
-        Ok(Self {
+        Ok(Some(Self {
             signer_public_key,
             signer_private_key,
             nonce: None,
             block_hash: None,
             submit,
-        })
+        }))
     }
 }
 

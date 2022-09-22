@@ -47,7 +47,7 @@ impl FunctionCallType {
     pub fn from_cli(
         optional_clap_variant: Option<<FunctionCallType as interactive_clap::ToCli>::CliVariant>,
         context: crate::GlobalContext,
-    ) -> color_eyre::eyre::Result<Self> {
+    ) -> color_eyre::eyre::Result<Option<Self>> {
         let allowance: Option<crate::common::NearBalance> = match optional_clap_variant
             .clone()
             .and_then(|clap_variant| clap_variant.allowance)
@@ -75,19 +75,24 @@ impl FunctionCallType {
             }
             None => FunctionCallType::input_method_names()?,
         };
-        let access_key_mode =
+        let optional_access_key_mode =
             match optional_clap_variant.and_then(|clap_variant| clap_variant.access_key_mode) {
                 Some(cli_access_key_mode) => {
                     super::AccessKeyMode::from_cli(Some(cli_access_key_mode), context)?
                 }
                 None => super::AccessKeyMode::choose_variant(context)?,
             };
-        Ok(Self {
+        let access_key_mode = if let Some(access_key_mode) = optional_access_key_mode {
+            access_key_mode
+        } else {
+            return Ok(None);
+        };
+        Ok(Some(Self {
             allowance,
             receiver_account_id,
             method_names,
             access_key_mode,
-        })
+        }))
     }
 }
 

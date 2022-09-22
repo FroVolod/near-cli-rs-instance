@@ -50,7 +50,11 @@ fn main() -> CliResult {
     //     return Ok(());
     // }
 
-    let cmd = Cmd::from_cli(Some(cli), (config.clone(),))?;
+    let cmd = loop {
+        if let Some(cmd) = Cmd::from_cli(Some(cli.clone()), (config.clone(),))? {
+            break cmd;
+        }
+    };
 
     let completed_cli = CliCmd::from(cmd.clone());
 

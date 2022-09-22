@@ -63,14 +63,20 @@ impl From<CliSkipNextAction> for CliNextAction {
 
 impl NextAction {
     pub fn from_cli_skip_next_action(
-        item: CliSkipNextAction,
+        item: Option<CliSkipNextAction>,
         context: crate::GlobalContext,
-    ) -> color_eyre::eyre::Result<Self> {
+    ) -> color_eyre::eyre::Result<Option<Self>> {
         match item {
-            CliSkipNextAction::Skip(cli_skip_action) => {
-                let skip_action: SkipAction = SkipAction::from_cli(Some(cli_skip_action), context)?;
-                Ok(Self::Skip(skip_action))
+            Some(CliSkipNextAction::Skip(cli_skip_action)) => {
+                let optional_skip_action =
+                    SkipAction::from_cli(Some(cli_skip_action), context.clone())?;
+                if let Some(skip_action) = optional_skip_action {
+                    Ok(Some(Self::Skip(skip_action)))
+                } else {
+                    Self::choose_variant(context.clone())
+                }
             }
+            None => Self::choose_variant(context.clone()),
         }
     }
 }
@@ -121,10 +127,15 @@ impl From<BoxNextAction> for CliSkipNextAction {
 }
 
 impl BoxNextAction {
-    fn choose_variant(context: crate::GlobalContext) -> color_eyre::eyre::Result<Self> {
-        Ok(Self {
-            inner: Box::new(NextAction::choose_variant(context)?),
-        })
+    fn choose_variant(context: crate::GlobalContext) -> color_eyre::eyre::Result<Option<Self>> {
+        let optional_next_action = NextAction::choose_variant(context)?;
+        if let Some(next_action) = optional_next_action {
+            Ok(Some(Self {
+                inner: Box::new(next_action),
+            }))
+        } else {
+            return Ok(None);
+        }
     }
 }
 
@@ -132,13 +143,16 @@ impl BoxNextAction {
     pub fn from_cli(
         optional_clap_variant: Option<<BoxNextAction as interactive_clap::ToCli>::CliVariant>,
         context: crate::GlobalContext,
-    ) -> color_eyre::eyre::Result<Self> {
-        Ok(Self {
-            inner: Box::new(NextAction::from_cli(
-                optional_clap_variant.map(Into::into),
-                context,
-            )?),
-        })
+    ) -> color_eyre::eyre::Result<Option<Self>> {
+        let optional_next_action =
+            NextAction::from_cli(optional_clap_variant.map(Into::into), context)?;
+        if let Some(next_action) = optional_next_action {
+            Ok(Some(Self {
+                inner: Box::new(next_action),
+            }))
+        } else {
+            return Ok(None);
+        }
     }
 }
 
