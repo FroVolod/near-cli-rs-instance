@@ -25,6 +25,7 @@ pub enum Mode {
     ))]
     ///Use auto-generation to create an implicit account
     UseAutoGeneration(self::SaveImplicitAccount),
+    #[cfg(feature = "ledger")]
     #[strum_discriminants(strum(
         message = "use-ledger           - Use ledger to create an implicit account"
     ))]
@@ -53,6 +54,7 @@ impl Mode {
                 file_name.push(format!("{}.json", key_pair_properties.implicit_account_id));
                 file_path.push(save_implicit_account.save_to_folder.get_folder_path());
             }
+            #[cfg(feature = "ledger")]
             Mode::UseLedger(save_implicit_account) => {
                 let seed_phrase_hd_path = crate::transaction_signature_options::sign_with_ledger::SignLedger::input_seed_phrase_hd_path();
                 println!(
