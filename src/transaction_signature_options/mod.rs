@@ -2,6 +2,7 @@ use dialoguer::{theme::ColorfulTheme, Input, Select};
 use strum::{EnumDiscriminants, EnumIter, EnumMessage, IntoEnumIterator};
 
 pub mod sign_with_keychain;
+#[cfg(feature = "ledger")]
 pub mod sign_with_ledger;
 pub mod sign_with_private_key;
 
