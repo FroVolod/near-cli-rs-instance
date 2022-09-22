@@ -20,6 +20,7 @@ pub enum SignWith {
         message = "sign-with-ledger                 - Sign the transaction with a ledger"
     ))]
     ///Sign the transaction with a ledger
+    #[cfg(feature = "ledger")]
     SignWithLedger(self::sign_with_ledger::SignLedger),
     #[strum_discriminants(strum(
         message = "sign-with-plaintext-private-key  - Sign the transaction with a plaintext private key"
