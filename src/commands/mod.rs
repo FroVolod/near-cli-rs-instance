@@ -1,141 +1,48 @@
-use near_primitives::views::ViewApplyState;
+use strum::{EnumDiscriminants, EnumIter, EnumMessage};
 
+mod account;
+mod config;
+mod contract;
 mod tokens;
+mod transaction;
 
-#[derive(clap::Subcommand, Debug, Clone)]
-pub enum TopLevel {
-    Account(AccountCommands),
-    Contract(ContractCommands),
-    Tokens(tokens::TokensCommands),
+#[derive(Debug, EnumDiscriminants, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
+#[strum_discriminants(derive(EnumMessage, EnumIter))]
+#[interactive_clap(disable_back)]
+/// What are you up to? (select one of the options with the up-down arrows on your keyboard and press Enter)
+pub enum TopLevelCommand {
+    #[strum_discriminants(strum(message = "account     - Manage accounts"))]
+    /// View account summary, create subaccount, delete account, list keys, add key, delete key, import account
+    Account(self::account::AccountCommands),
+    #[strum_discriminants(strum(
+        message = "tokens      - Manage token assets such as NEAR, FT, NFT"
+    ))]
+    /// Use this for token actions: send or view balances of NEAR, FT, or NFT
+    Tokens(self::tokens::TokensCommands),
+    #[strum_discriminants(strum(
+        message = "contract    - Manage smart-contracts: deploy code, call functions"
+    ))]
+    /// Use this for contract actions: call function, deploy, download wasm, inspect storage
+    Contract(self::contract::ContractCommands),
+    #[strum_discriminants(strum(message = "transaction - Operate transactions"))]
+    /// Use this to construct transactions or view a transaction status.
+    Transaction(self::transaction::TransactionCommands),
+    #[strum_discriminants(strum(
+        message = "config      - Manage connections in a configuration file (config.toml)"
+    ))]
+    /// Use this to manage connections in a configuration file (config.toml).
+    Config(self::config::ConfigCommands),
 }
 
-impl TopLevel {
-    pub async fn process(&self) -> crate::CliResult {
-        let unsigned_transaction = near_primitives::transaction::Transaction {
-            signer_id: "test".parse().unwrap(),
-            public_key: near_crypto::PublicKey::empty(near_crypto::KeyType::ED25519),
-            nonce: 0,
-            receiver_id: "test".parse().unwrap(),
-            block_hash: Default::default(),
-            actions: vec![],
-        };
+impl TopLevelCommand {
+    pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
         match self {
-            Self::Tokens(tokens_commands) => tokens_commands.process(unsigned_transaction).await,
-            Self::Account(account_commands) => account_commands.process().await,
-            _ => todo!(),
+            Self::Tokens(tokens_commands) => tokens_commands.process(config).await,
+            Self::Account(account_commands) => account_commands.process(config).await,
+            Self::Contract(contract_commands) => contract_commands.process(config).await,
+            Self::Transaction(transaction_commands) => transaction_commands.process(config).await,
+            Self::Config(config_commands) => config_commands.process(config).await,
         }
     }
-}
-
-#[derive(clap::Args, Debug, Clone)]
-pub struct AccountCommands {
-    account_id: String,
-    #[clap(subcommand)]
-    network: Network<ViewAtBlock>,
-}
-
-impl AccountCommands {
-    pub async fn process(
-        &self,
-    ) -> crate::CliResult {
-        // TODO: use account_id
-        self.network.process().await
-    }
-}
-
-#[derive(clap::Args, Debug, Clone)]
-pub struct ContractCommands {
-    contract_id: String,
-    #[clap(subcommand)]
-    network: Network<crate::transaction_signature_options::SignWith>,
-}
-
-#[derive(clap::Subcommand, Debug, Clone)]
-enum Network<Next: clap::Subcommand> {
-    Network(NetworkArgs<Next>),
-}
-
-impl Network<crate::transaction_signature_options::SignWith> {
-    pub async fn process(
-        &self,
-        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
-    ) -> crate::CliResult {
-        match self {
-            Self::Network(network) => network.process(prepopulated_unsigned_transaction).await,
-        }
-    }
-}
-
-impl Network<ViewAtBlock> {
-    pub async fn process(
-        &self,
-    ) -> crate::CliResult {
-        match self {
-            Self::Network(network) => network.process().await,
-        }
-    }
-}
-
-#[derive(clap::Args, Debug, Clone)]
-struct NetworkArgs<Next: clap::Subcommand> {
-    network_name: String,
-    #[clap(subcommand)]
-    next: Next,
-}
-
-impl NetworkArgs<crate::transaction_signature_options::SignWith> {
-    async fn process(
-        &self,
-        prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
-    ) -> crate::CliResult {
-        let connection_config: crate::common::ConnectionConfig = match self.network_name.as_str() {
-            "testnet" => crate::common::ConnectionConfig::Testnet,
-            "mainnet" => crate::common::ConnectionConfig::Mainnet,
-            "betanet" => crate::common::ConnectionConfig::Betanet,
-            _ => todo!(),
-        };
-
-        self.next.process(
-            prepopulated_unsigned_transaction,
-            connection_config,
-        )
-        .await
-    }
-}
-
-impl NetworkArgs<ViewAtBlock> {
-    async fn process(
-        &self,
-    ) -> crate::CliResult {
-        let connection_config: crate::common::ConnectionConfig = match self.network_name.as_str() {
-            "testnet" => crate::common::ConnectionConfig::Testnet,
-            "mainnet" => crate::common::ConnectionConfig::Mainnet,
-            "betanet" => crate::common::ConnectionConfig::Betanet,
-            _ => todo!(),
-        };
-
-        self.next.process(
-            connection_config,
-        )
-        .await
-    }
-}
-
-#[derive(clap::Subcommand, Debug, Clone)]
-enum ViewAtBlock {
-    Now,
-    AtBlockHeight(AtBlockHeight),
-}
-
-impl ViewAtBlock {
-    async fn process(&self, connection_config: crate::common::ConnectionConfig) -> crate::CliResult {
-        match self {
-            _ => todo!("view at block process"),
-        }
-    }
-}
-
-#[derive(clap::Args, Debug, Clone)]
-struct AtBlockHeight {
-    block_height: u64,
 }

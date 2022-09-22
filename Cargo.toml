@@ -1,5 +1,5 @@
 [package]
-name = "near-cli-rs-instance"
+name = "near-cli"
 version = "0.1.0"
 edition = "2021"
 
@@ -26,8 +26,10 @@ bip39 = { version = "1.0.0", features = [ "rand" ] }
 bs58 = "0.3"
 ed25519-dalek = { version = "1" }
 hex = "0.4.2"
+linked-hash-map = { version = "0.5", features = ["serde_impl"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.57"
+toml = "0.5.9"
 dirs = "3.0"
 shellexpand = "2.1.0"
 slip10 = "0.4.3"
@@ -36,7 +38,7 @@ open = "2"
 shell-words = "1.0.0"
 cargo-util = "0.1.1"
 
-color-eyre = "0.5"
+color-eyre = "0.6"
 
 near-ledger = { version = "0.1.1", optional = true }
 
@@ -45,8 +47,11 @@ near-primitives = "0.14"
 near-jsonrpc-client = "0.4.0-beta.0"
 near-jsonrpc-primitives = "0.14"
 
-interactive_clap = { git = "https://github.com/FroVolod/interactive-clap", rev="23481402d7f36d9e7b0f5460f6d249bcf4c31ec5" }
-interactive_clap_derive = { git = "https://github.com/FroVolod/interactive-clap", rev="23481402d7f36d9e7b0f5460f6d249bcf4c31ec5" }
+interactive_clap = { git = "https://github.com/FroVolod/interactive-clap", rev="5cfa046d5aeec70c8446efccf24f3a30658408ea" }
+interactive_clap_derive = { git = "https://github.com/FroVolod/interactive-clap", rev="5cfa046d5aeec70c8446efccf24f3a30658408ea" }
+# interactive_clap = { path = "/Users/frovolod/Documents2/Rust/hello-macro/macro-proba/interactive_clap" }
+# interactive_clap_derive = { path = "/Users/frovolod/Documents2/Rust/hello-macro/macro-proba/interactive_clap/interactive_clap_derive" }
+
 
 [features]
 default = ["ledger"]

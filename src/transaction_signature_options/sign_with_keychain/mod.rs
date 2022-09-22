@@ -2,12 +2,20 @@ extern crate dirs;
 
 use serde::Deserialize;
 
-#[derive(clap::Args, Debug, Clone)]
+#[derive(Debug, Clone, interactive_clap::InteractiveClap)]
+#[interactive_clap(context = crate::GlobalContext)]
+#[interactive_clap(skip_default_from_cli)]
 pub struct SignKeychain {
-    pub nonce: Option<u64>,
-    pub block_hash: Option<String>,
-    #[clap(subcommand)]
-    pub submit: super::Submit,
+    #[interactive_clap(long)]
+    #[interactive_clap(skip_default_from_cli_arg)]
+    #[interactive_clap(skip_default_input_arg)]
+    nonce: Option<u64>,
+    #[interactive_clap(long)]
+    #[interactive_clap(skip_default_from_cli_arg)]
+    #[interactive_clap(skip_default_input_arg)]
+    block_hash: Option<String>,
+    #[interactive_clap(subcommand)]
+    submit: Option<super::Submit>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -18,39 +26,54 @@ struct User {
 }
 
 impl SignKeychain {
+    pub fn from_cli(
+        optional_clap_variant: Option<<SignKeychain as interactive_clap::ToCli>::CliVariant>,
+        _context: crate::GlobalContext,
+    ) -> color_eyre::eyre::Result<Option<Self>> {
+        let submit: Option<super::Submit> = optional_clap_variant
+            .clone()
+            .and_then(|clap_variant| clap_variant.submit);
+        Ok(Some(Self {
+            nonce: None,
+            block_hash: None,
+            submit,
+        }))
+    }
+}
+
+impl SignKeychain {
     pub async fn process(
         &self,
         prepopulated_unsigned_transaction: near_primitives::transaction::Transaction,
-        network_connection_config: crate::common::ConnectionConfig,
+        network_config: crate::config::NetworkConfig,
+        credentials_home_dir: std::path::PathBuf,
     ) -> crate::CliResult {
-        let home_dir = dirs::home_dir().expect("Impossible to get your home dir!");
         let file_name = format!("{}.json", prepopulated_unsigned_transaction.signer_id);
-        let mut path = std::path::PathBuf::from(&home_dir);
+        let mut path = std::path::PathBuf::from(&credentials_home_dir);
 
         let data_path: std::path::PathBuf = {
-            let dir_name = network_connection_config.dir_name();
+            let dir_name = network_config.network_name.as_str();
             path.push(dir_name);
             path.push(file_name);
 
             if path.exists() {
                 path
             } else {
-                let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(
-                    network_connection_config.rpc_url(),
-                )
-                .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-                    block_reference: near_primitives::types::Finality::Final.into(),
-                    request: near_primitives::views::QueryRequest::ViewAccessKeyList {
-                        account_id: prepopulated_unsigned_transaction.signer_id.clone(),
-                    },
-                })
-                .await
-                .map_err(|err| {
-                    color_eyre::Report::msg(format!(
-                        "Failed to fetch query for view key list: {:?}",
-                        err
-                    ))
-                })?;
+                let query_view_method_response =
+                    near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone())
+                        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
+                            block_reference: near_primitives::types::Finality::Final.into(),
+                            request: near_primitives::views::QueryRequest::ViewAccessKeyList {
+                                account_id: prepopulated_unsigned_transaction.signer_id.clone(),
+                            },
+                        })
+                        .await
+                        .map_err(|err| {
+                            color_eyre::Report::msg(format!(
+                                "Failed to fetch query for view key list: {:?}",
+                                err
+                            ))
+                        })?;
                 let access_key_view =
                     if let near_jsonrpc_primitives::types::query::QueryResponseKind::AccessKeyList(
                         result,
@@ -60,7 +83,7 @@ impl SignKeychain {
                     } else {
                         return Err(color_eyre::Report::msg(format!("Error call result")));
                     };
-                let mut path = std::path::PathBuf::from(&home_dir);
+                let mut path = std::path::PathBuf::from(&credentials_home_dir);
                 path.push(dir_name);
                 path.push(&prepopulated_unsigned_transaction.signer_id.to_string());
                 let mut data_path = std::path::PathBuf::new();
@@ -109,14 +132,14 @@ impl SignKeychain {
         let account_json: User = serde_json::from_str(&data)
             .map_err(|err| color_eyre::Report::msg(format!("Error reading data: {}", err)))?;
         let sign_with_private_key = super::sign_with_private_key::SignPrivateKey {
-            signer_public_key: account_json.public_key,
-            signer_private_key: account_json.private_key,
+            signer_public_key: crate::types::public_key::PublicKey(account_json.public_key),
+            signer_private_key: crate::types::secret_key::SecretKey(account_json.private_key),
             nonce: self.nonce.clone(),
             block_hash: self.block_hash.clone(),
             submit: self.submit.clone(),
         };
         sign_with_private_key
-            .process(prepopulated_unsigned_transaction, network_connection_config)
+            .process(prepopulated_unsigned_transaction, network_config)
             .await
     }
 }

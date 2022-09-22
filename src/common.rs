@@ -1,5 +1,6 @@
 use std::convert::{TryFrom, TryInto};
 use std::io::Write;
+use std::str::FromStr;
 
 use near_primitives::{
     borsh::BorshDeserialize,
@@ -37,11 +38,26 @@ where
     variants[selected]
 }
 
-#[derive(Debug, Clone)]
-pub struct SignerContext {
-    pub connection_config: Option<ConnectionConfig>,
-    pub signer_account_id: crate::types::account_id::AccountId,
-}
+// #[derive(Debug, Clone)]
+// pub enum ViewItems {
+//     ViewAccountSummary,
+//     ViewAccessKeyList,
+//     ViewNonce,
+//     ViewCallFunction,
+//     ViewContractHash,
+//     ViewContractCode,
+//     ViewContractState,
+//     ViewTransactionStatus,
+//     ViewNearBalance,
+//     ViewFtBalance,
+//     ViewNftBalance,
+// }
+
+// #[derive(Debug, Clone)]
+// pub struct SignerContext {
+//     pub connection_config: Option<ConnectionConfig>,
+//     pub signer_account_id: crate::types::account_id::AccountId,
+// }
 
 #[derive(
     Debug,
@@ -389,73 +405,6 @@ impl From<TransferAmount> for NearBalance {
     }
 }
 
-#[derive(Debug, Clone)]
-pub enum ConnectionConfig {
-    Testnet,
-    Mainnet,
-    Betanet,
-    Custom { url: url::Url },
-}
-
-impl ConnectionConfig {
-    pub fn from_custom_url(custom_url: &AvailableRpcServerUrl) -> Self {
-        Self::Custom {
-            url: custom_url.inner.clone(),
-        }
-    }
-
-    pub fn rpc_url(&self) -> url::Url {
-        match self {
-            Self::Testnet => crate::consts::TESTNET_API_SERVER_URL.parse().unwrap(),
-            Self::Mainnet => crate::consts::MAINNET_API_SERVER_URL.parse().unwrap(),
-            Self::Betanet => crate::consts::BETANET_API_SERVER_URL.parse().unwrap(),
-            Self::Custom { url } => url.clone(),
-        }
-    }
-
-    pub fn archival_rpc_url(&self) -> url::Url {
-        match self {
-            Self::Testnet => crate::consts::TESTNET_ARCHIVAL_API_SERVER_URL
-                .parse()
-                .unwrap(),
-            Self::Mainnet => crate::consts::MAINNET_ARCHIVAL_API_SERVER_URL
-                .parse()
-                .unwrap(),
-            Self::Betanet => crate::consts::BETANET_ARCHIVAL_API_SERVER_URL
-                .parse()
-                .unwrap(),
-            Self::Custom { url } => url.clone(),
-        }
-    }
-
-    pub fn wallet_url(&self) -> url::Url {
-        match self {
-            Self::Testnet => crate::consts::TESTNET_WALLET_URL.parse().unwrap(),
-            Self::Mainnet => crate::consts::MAINNET_WALLET_URL.parse().unwrap(),
-            Self::Betanet => crate::consts::BETANET_WALLET_URL.parse().unwrap(),
-            Self::Custom { url } => url.clone(),
-        }
-    }
-
-    pub fn transaction_explorer(&self) -> url::Url {
-        match self {
-            Self::Testnet => crate::consts::TESTNET_TRANSACTION_URL.parse().unwrap(),
-            Self::Mainnet => crate::consts::MAINNET_TRANSACTION_URL.parse().unwrap(),
-            Self::Betanet => crate::consts::BETANET_TRANSACTION_URL.parse().unwrap(),
-            Self::Custom { url } => url.clone(),
-        }
-    }
-
-    pub fn dir_name(&self) -> &str {
-        match self {
-            Self::Testnet => crate::consts::DIR_NAME_TESTNET,
-            Self::Mainnet => crate::consts::DIR_NAME_MAINNET,
-            Self::Betanet => crate::consts::DIR_NAME_BETANET,
-            Self::Custom { url: _ } => crate::consts::DIR_NAME_CUSTOM,
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct AccountTransferAllowance {
     account_id: near_primitives::types::AccountId,
@@ -496,37 +445,38 @@ impl AccountTransferAllowance {
     }
 }
 
-pub fn get_account_transfer_allowance(
-    connection_config: &ConnectionConfig,
+pub async fn get_account_transfer_allowance(
+    network_config: crate::config::NetworkConfig,
     account_id: near_primitives::types::AccountId,
+    block_reference: BlockReference,
 ) -> color_eyre::eyre::Result<AccountTransferAllowance> {
-    let account_view =
-        if let Some(account_view) = get_account_state(connection_config, account_id.clone())? {
-            account_view
-        } else {
-            return Ok(AccountTransferAllowance {
-                account_id,
-                account_liquid_balance: NearBalance::from_yoctonear(0),
-                account_locked_balance: NearBalance::from_yoctonear(0),
-                storage_stake: NearBalance::from_yoctonear(0),
-                pessimistic_transaction_fee: NearBalance::from_yoctonear(0),
-            });
-        };
-    let storage_amount_per_byte = tokio::runtime::Runtime::new().unwrap()
-        .block_on(async {
-            near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url().as_str())
-                .call(
-                    near_jsonrpc_client::methods::EXPERIMENTAL_protocol_config::RpcProtocolConfigRequest {
-                        block_reference: near_primitives::types::BlockReference::Finality(
-                            near_primitives::types::Finality::Final,
-                        ),
-                    },
-                )
-                .await
-        })
-        .map_err(|err| color_eyre::Report::msg(format!("RpcError: {:?}", err)))?
-        .runtime_config
-        .storage_amount_per_byte;
+    let account_view = if let Some(account_view) =
+        get_account_state(network_config.clone(), account_id.clone(), block_reference).await?
+    {
+        account_view
+    } else {
+        return Ok(AccountTransferAllowance {
+            account_id,
+            account_liquid_balance: NearBalance::from_yoctonear(0),
+            account_locked_balance: NearBalance::from_yoctonear(0),
+            storage_stake: NearBalance::from_yoctonear(0),
+            pessimistic_transaction_fee: NearBalance::from_yoctonear(0),
+        });
+    };
+    let storage_amount_per_byte = near_jsonrpc_client::JsonRpcClient::connect(
+        network_config.rpc_url,
+    )
+    .call(
+        near_jsonrpc_client::methods::EXPERIMENTAL_protocol_config::RpcProtocolConfigRequest {
+            block_reference: near_primitives::types::BlockReference::Finality(
+                near_primitives::types::Finality::Final,
+            ),
+        },
+    )
+    .await
+    .map_err(|err| color_eyre::Report::msg(format!("RpcError: {:?}", err)))?
+    .runtime_config
+    .storage_amount_per_byte;
 
     Ok(AccountTransferAllowance {
         account_id,
@@ -542,18 +492,21 @@ pub fn get_account_transfer_allowance(
     })
 }
 
-pub fn get_account_state(
-    connection_config: &ConnectionConfig,
+pub async fn get_account_state(
+    network_config: crate::config::NetworkConfig,
     account_id: near_primitives::types::AccountId,
+    block_reference: BlockReference,
 ) -> color_eyre::eyre::Result<Option<near_primitives::views::AccountView>> {
-    let query_view_method_response = tokio::runtime::Runtime::new().unwrap().block_on(async {
-        near_jsonrpc_client::JsonRpcClient::connect(connection_config.rpc_url().as_str())
-            .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-                block_reference: near_primitives::types::Finality::Final.into(),
-                request: near_primitives::views::QueryRequest::ViewAccount { account_id },
-            })
-            .await
-    });
+    let server_addr = match block_reference {
+        BlockReference::Finality(_) | BlockReference::BlockId(_) => network_config.rpc_url,
+        BlockReference::SyncCheckpoint(_) => todo!(),
+    };
+    let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(server_addr)
+        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
+            block_reference,
+            request: near_primitives::views::QueryRequest::ViewAccount { account_id },
+        })
+        .await;
     match query_view_method_response {
         Ok(rpc_query_response) => {
             let account_view =
@@ -590,59 +543,84 @@ pub struct KeyPairProperties {
     pub secret_keypair_str: String,
 }
 
-// pub async fn generate_keypair() -> color_eyre::eyre::Result<KeyPairProperties> {
-//     let generate_keypair: crate::commands::utils_command::generate_keypair_subcommand::CliGenerateKeypair =
-//         crate::commands::utils_command::generate_keypair_subcommand::CliGenerateKeypair::default();
-//     let (master_seed_phrase, master_seed) =
-//         if let Some(master_seed_phrase) = generate_keypair.master_seed_phrase.as_deref() {
-//             (
-//                 master_seed_phrase.to_owned(),
-//                 bip39::Mnemonic::parse(master_seed_phrase)?.to_seed(""),
-//             )
-//         } else {
-//             let mnemonic =
-//                 bip39::Mnemonic::generate(generate_keypair.new_master_seed_phrase_words_count)?;
-//             let master_seed_phrase = mnemonic.word_iter().collect::<Vec<&str>>().join(" ");
-//             (master_seed_phrase, mnemonic.to_seed(""))
-//         };
+pub fn get_public_key_from_seed_phrase(
+    seed_phrase_hd_path: slip10::BIP32Path,
+    master_seed_phrase: &str,
+) -> color_eyre::eyre::Result<near_crypto::PublicKey> {
+    let master_seed = bip39::Mnemonic::parse(master_seed_phrase)?.to_seed("");
+    let derived_private_key =
+        slip10::derive_key_from_path(&master_seed, slip10::Curve::Ed25519, &seed_phrase_hd_path)
+            .map_err(|err| {
+                color_eyre::Report::msg(format!(
+                    "Failed to derive a key from the master key: {}",
+                    err
+                ))
+            })?;
+    let secret_keypair = {
+        let secret = ed25519_dalek::SecretKey::from_bytes(&derived_private_key.key)?;
+        let public = ed25519_dalek::PublicKey::from(&secret);
+        ed25519_dalek::Keypair { secret, public }
+    };
+    let public_key_str = format!(
+        "ed25519:{}",
+        bs58::encode(&secret_keypair.public).into_string()
+    );
+    Ok(near_crypto::PublicKey::from_str(&public_key_str)?)
+}
 
-//     let derived_private_key = slip10::derive_key_from_path(
-//         &master_seed,
-//         slip10::Curve::Ed25519,
-//         &generate_keypair.seed_phrase_hd_path,
-//     )
-//     .map_err(|err| {
-//         color_eyre::Report::msg(format!(
-//             "Failed to derive a key from the master key: {}",
-//             err
-//         ))
-//     })?;
+pub async fn generate_keypair() -> color_eyre::eyre::Result<KeyPairProperties> {
+    let generate_keypair: crate::utils_command::generate_keypair_subcommand::CliGenerateKeypair =
+        crate::utils_command::generate_keypair_subcommand::CliGenerateKeypair::default();
+    let (master_seed_phrase, master_seed) =
+        if let Some(master_seed_phrase) = generate_keypair.master_seed_phrase.as_deref() {
+            (
+                master_seed_phrase.to_owned(),
+                bip39::Mnemonic::parse(master_seed_phrase)?.to_seed(""),
+            )
+        } else {
+            let mnemonic =
+                bip39::Mnemonic::generate(generate_keypair.new_master_seed_phrase_words_count)?;
+            let master_seed_phrase = mnemonic.word_iter().collect::<Vec<&str>>().join(" ");
+            (master_seed_phrase, mnemonic.to_seed(""))
+        };
 
-//     let secret_keypair = {
-//         let secret = ed25519_dalek::SecretKey::from_bytes(&derived_private_key.key)?;
-//         let public = ed25519_dalek::PublicKey::from(&secret);
-//         ed25519_dalek::Keypair { secret, public }
-//     };
+    let derived_private_key = slip10::derive_key_from_path(
+        &master_seed,
+        slip10::Curve::Ed25519,
+        &generate_keypair.seed_phrase_hd_path.clone().into(),
+    )
+    .map_err(|err| {
+        color_eyre::Report::msg(format!(
+            "Failed to derive a key from the master key: {}",
+            err
+        ))
+    })?;
 
-//     let implicit_account_id =
-//         near_primitives::types::AccountId::try_from(hex::encode(&secret_keypair.public))?;
-//     let public_key_str = format!(
-//         "ed25519:{}",
-//         bs58::encode(&secret_keypair.public).into_string()
-//     );
-//     let secret_keypair_str = format!(
-//         "ed25519:{}",
-//         bs58::encode(secret_keypair.to_bytes()).into_string()
-//     );
-//     let key_pair_properties: KeyPairProperties = KeyPairProperties {
-//         seed_phrase_hd_path: generate_keypair.seed_phrase_hd_path,
-//         master_seed_phrase,
-//         implicit_account_id,
-//         public_key_str,
-//         secret_keypair_str,
-//     };
-//     Ok(key_pair_properties)
-// }
+    let secret_keypair = {
+        let secret = ed25519_dalek::SecretKey::from_bytes(&derived_private_key.key)?;
+        let public = ed25519_dalek::PublicKey::from(&secret);
+        ed25519_dalek::Keypair { secret, public }
+    };
+
+    let implicit_account_id =
+        near_primitives::types::AccountId::try_from(hex::encode(&secret_keypair.public))?;
+    let public_key_str = format!(
+        "ed25519:{}",
+        bs58::encode(&secret_keypair.public).into_string()
+    );
+    let secret_keypair_str = format!(
+        "ed25519:{}",
+        bs58::encode(secret_keypair.to_bytes()).into_string()
+    );
+    let key_pair_properties: KeyPairProperties = KeyPairProperties {
+        seed_phrase_hd_path: generate_keypair.seed_phrase_hd_path.into(),
+        master_seed_phrase,
+        implicit_account_id,
+        public_key_str,
+        secret_keypair_str,
+    };
+    Ok(key_pair_properties)
+}
 
 pub fn print_transaction(transaction: near_primitives::transaction::Transaction) {
     println!("{:<13} {}", "signer_id:", &transaction.signer_id);
@@ -1118,7 +1096,7 @@ pub fn print_transaction_error(tx_execution_error: near_primitives::errors::TxEx
 
 pub fn print_transaction_status(
     transaction_info: near_primitives::views::FinalExecutionOutcomeView,
-    network_connection_config: Option<crate::common::ConnectionConfig>,
+    network_config: crate::config::NetworkConfig,
 ) {
     match transaction_info.status {
         near_primitives::views::FinalExecutionStatus::NotStarted
@@ -1130,18 +1108,15 @@ pub fn print_transaction_status(
             print_value_successful_transaction(transaction_info.clone())
         }
     };
-    let transaction_explorer: url::Url = match network_connection_config {
-        Some(connection_config) => connection_config.transaction_explorer(),
-        None => unreachable!("Error"),
-    };
     println!("Transaction ID: {id}\nTo see the transaction in the transaction explorer, please open this url in your browser:\n{path}{id}\n",
         id=transaction_info.transaction_outcome.id,
-        path=transaction_explorer
+        path=network_config.explorer_transaction_url
     );
 }
 
 pub async fn save_access_key_to_keychain(
-    network_connection_config: Option<crate::common::ConnectionConfig>,
+    network_config: crate::config::NetworkConfig,
+    credentials_home_dir: std::path::PathBuf,
     key_pair_properties: crate::common::KeyPairProperties,
     account_id: &str,
 ) -> crate::CliResult {
@@ -1155,17 +1130,13 @@ pub async fn save_access_key_to_keychain(
             "private_key": key_pair_properties.secret_keypair_str,
         })
     );
-    let home_dir = dirs::home_dir().expect("Impossible to get your home dir!");
-    let dir_name = match &network_connection_config {
-        Some(connection_config) => connection_config.dir_name(),
-        None => crate::consts::DIR_NAME_KEY_CHAIN,
-    };
+    let dir_name = network_config.network_name.as_str();
     let file_with_key_name: std::path::PathBuf = format!(
         "{}.json",
         key_pair_properties.public_key_str.replace(":", "_")
     )
     .into();
-    let mut path_with_key_name = std::path::PathBuf::from(&home_dir);
+    let mut path_with_key_name = std::path::PathBuf::from(&credentials_home_dir);
     path_with_key_name.push(dir_name);
     path_with_key_name.push(account_id);
     std::fs::create_dir_all(&path_with_key_name)?;
@@ -1180,7 +1151,7 @@ pub async fn save_access_key_to_keychain(
     );
 
     let file_with_account_name: std::path::PathBuf = format!("{}.json", account_id).into();
-    let mut path_with_account_name = std::path::PathBuf::from(&home_dir);
+    let mut path_with_account_name = std::path::PathBuf::from(&credentials_home_dir);
     path_with_account_name.push(dir_name);
     path_with_account_name.push(file_with_account_name);
     if path_with_account_name.exists() {
@@ -1203,51 +1174,82 @@ pub async fn save_access_key_to_keychain(
     Ok(())
 }
 
-// pub fn try_external_subcommand_execution(error: clap::Error) -> CliResult {
-//     let (subcommand, args) = {
-//         let mut args = std::env::args().skip(1);
-//         let subcommand = args
-//             .next()
-//             .ok_or_else(|| color_eyre::eyre::eyre!("subcommand is not provided"))?;
-//         (subcommand, args.collect::<Vec<String>>())
-//     };
-//     let is_top_level_command_known = crate::commands::TopLevelCommandDiscriminants::iter()
-//         .map(|x| format!("{:?}", &x).to_lowercase())
-//         .find(|x| x == &subcommand)
-//         .is_some();
-//     if is_top_level_command_known {
-//         error.exit()
-//     }
-//     let subcommand_exe = format!("near-cli-{}{}", subcommand, std::env::consts::EXE_SUFFIX);
+pub fn get_config_toml() -> color_eyre::eyre::Result<crate::config::Config> {
+    if let Some(mut path_config_toml) = dirs::config_dir() {
+        path_config_toml.push("near-cli");
+        std::fs::create_dir_all(&path_config_toml)?;
+        path_config_toml.push("config.toml");
 
-//     let path = path_directories()
-//         .iter()
-//         .map(|dir| dir.join(&subcommand_exe))
-//         .find(|file| is_executable(file));
+        if !path_config_toml.is_file() {
+            write_config_toml(crate::config::Config::default())?;
+        };
+        let config_toml = std::fs::read_to_string(path_config_toml)?;
+        Ok(toml::from_str(&config_toml)?)
+    } else {
+        Ok(crate::config::Config::default())
+    }
+}
 
-//     let command = path.ok_or_else(|| {
-//         color_eyre::eyre::eyre!(
-//             "{} command or {} extension does not exist",
-//             subcommand,
-//             subcommand_exe
-//         )
-//     })?;
+pub fn write_config_toml(config: crate::config::Config) -> CliResult {
+    let config_toml = toml::to_string(&config)?;
+    let mut path_config_toml = dirs::config_dir().expect("Impossible to get your config dir!");
+    path_config_toml.push("near-cli/config.toml");
+    std::fs::File::create(&path_config_toml)
+        .map_err(|err| color_eyre::Report::msg(format!("Failed to create file: {:?}", err)))?
+        .write(config_toml.as_bytes())
+        .map_err(|err| color_eyre::Report::msg(format!("Failed to write to file: {:?}", err)))?;
+    println!(
+        "The data for the access key is saved in a file {}",
+        &path_config_toml.display()
+    );
+    Ok(())
+}
 
-//     let err = match cargo_util::ProcessBuilder::new(&command)
-//         .args(&args)
-//         .exec_replace()
-//     {
-//         Ok(()) => return Ok(()),
-//         Err(e) => e,
-//     };
+pub fn try_external_subcommand_execution(error: clap::Error) -> CliResult {
+    let (subcommand, args) = {
+        let mut args = std::env::args().skip(1);
+        let subcommand = args
+            .next()
+            .ok_or_else(|| color_eyre::eyre::eyre!("subcommand is not provided"))?;
+        (subcommand, args.collect::<Vec<String>>())
+    };
+    let is_top_level_command_known = crate::commands::TopLevelCommandDiscriminants::iter()
+        .map(|x| format!("{:?}", &x).to_lowercase())
+        .find(|x| x == &subcommand)
+        .is_some();
+    if is_top_level_command_known {
+        error.exit()
+    }
+    let subcommand_exe = format!("near-cli-{}{}", subcommand, std::env::consts::EXE_SUFFIX);
 
-//     if let Some(perr) = err.downcast_ref::<cargo_util::ProcessError>() {
-//         if let Some(code) = perr.code {
-//             return Err(color_eyre::eyre::eyre!("perror occurred, code: {}", code));
-//         }
-//     }
-//     return Err(color_eyre::eyre::eyre!(err));
-// }
+    let path = path_directories()
+        .iter()
+        .map(|dir| dir.join(&subcommand_exe))
+        .find(|file| is_executable(file));
+
+    let command = path.ok_or_else(|| {
+        color_eyre::eyre::eyre!(
+            "{} command or {} extension does not exist",
+            subcommand,
+            subcommand_exe
+        )
+    })?;
+
+    let err = match cargo_util::ProcessBuilder::new(&command)
+        .args(&args)
+        .exec_replace()
+    {
+        Ok(()) => return Ok(()),
+        Err(e) => e,
+    };
+
+    if let Some(perr) = err.downcast_ref::<cargo_util::ProcessError>() {
+        if let Some(code) = perr.code {
+            return Err(color_eyre::eyre::eyre!("perror occurred, code: {}", code));
+        }
+    }
+    return Err(color_eyre::eyre::eyre!(err));
+}
 
 fn is_executable<P: AsRef<std::path::Path>>(path: P) -> bool {
     #[cfg(target_family = "unix")]
@@ -1271,10 +1273,10 @@ fn path_directories() -> Vec<std::path::PathBuf> {
 
 pub async fn display_account_info(
     account_id: AccountId,
-    conf: &ConnectionConfig,
+    network_config: crate::config::NetworkConfig,
     block_ref: BlockReference,
 ) -> crate::CliResult {
-    let resp = near_jsonrpc_client::JsonRpcClient::connect(conf.archival_rpc_url())
+    let resp = near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url)
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: block_ref,
             request: QueryRequest::ViewAccount {
@@ -1317,10 +1319,10 @@ pub async fn display_account_info(
 
 pub async fn display_access_key_list(
     account_id: AccountId,
-    conf: &ConnectionConfig,
+    network_config: crate::config::NetworkConfig,
     block_ref: BlockReference,
 ) -> crate::CliResult {
-    let resp = near_jsonrpc_client::JsonRpcClient::connect(conf.archival_rpc_url())
+    let resp = near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url)
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: block_ref,
             request: QueryRequest::ViewAccessKeyList { account_id },
@@ -1370,6 +1372,17 @@ pub async fn display_access_key_list(
         );
     }
     Ok(())
+}
+
+pub fn input_network_name(context: &crate::GlobalContext) -> color_eyre::eyre::Result<String> {
+    let variants = context.0.networks.keys().collect::<Vec<_>>();
+    let select_submit = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("What is the name of the network?")
+        .items(&variants)
+        .default(0)
+        .interact()
+        .unwrap();
+    Ok(variants[select_submit].to_string())
 }
 
 #[cfg(test)]
