@@ -70,6 +70,7 @@ impl NoInitialize {
                     )
                     .await
             }
+            #[cfg(feature = "ledger")]
             crate::transaction_signature_options::SignWith::SignWithLedger(sign_ledger) => {
                 sign_ledger
                     .process(
