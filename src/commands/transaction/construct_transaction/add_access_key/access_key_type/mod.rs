@@ -75,13 +75,18 @@ impl FunctionCallType {
             }
             None => FunctionCallType::input_method_names()?,
         };
-        let access_key_mode =
+        let optional_access_key_mode =
             match optional_clap_variant.and_then(|clap_variant| clap_variant.access_key_mode) {
                 Some(cli_access_key_mode) => {
                     super::AccessKeyMode::from_cli(Some(cli_access_key_mode), context)?
                 }
                 None => super::AccessKeyMode::choose_variant(context)?,
             };
+        let access_key_mode = if let Some(access_key_mode) = optional_access_key_mode {
+            access_key_mode
+        } else {
+            return Ok(None);
+        };
         Ok(Some(Self {
             allowance,
             receiver_account_id,
