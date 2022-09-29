@@ -11,9 +11,9 @@ pub struct AddNetworkConnection {
     ///What is the RPC endpoint?
     rpc_url: crate::common::AvailableRpcServerUrl,
     ///What is the wallet endpoint?
-    wallet_url: crate::common::AvailableRpcServerUrl,
+    wallet_url: crate::types::url::Url,
     ///What is the transaction explorer endpoint?
-    explorer_transaction_url: crate::common::AvailableRpcServerUrl,
+    explorer_transaction_url: crate::types::url::Url,
     #[interactive_clap(skip_default_from_cli_arg)]
     #[interactive_clap(skip_default_input_arg)]
     api_key: Option<String>,
@@ -108,8 +108,8 @@ impl AddNetworkConnection {
                 network_name: self.network_name.clone(),
                 connection_name: self.connection_name.clone(),
                 rpc_url: self.rpc_url.inner.clone(),
-                wallet_url: self.wallet_url.inner.clone(),
-                explorer_transaction_url: self.explorer_transaction_url.inner.clone(),
+                wallet_url: self.wallet_url.0.clone(),
+                explorer_transaction_url: self.explorer_transaction_url.0.clone(),
                 api_key: self.api_key.clone(),
             },
         );
