@@ -1146,8 +1146,8 @@ pub async fn save_access_key_to_keychain(
         .write(buf.as_bytes())
         .map_err(|err| color_eyre::Report::msg(format!("Failed to write to file: {:?}", err)))?;
     println!(
-        "The data for the access key is saved in a file {}",
-        &path_with_key_name.display()
+        "The data for the access key is saved in a file {:?}",
+        &path_with_key_name
     );
 
     let file_with_account_name: std::path::PathBuf = format!("{}.json", account_id).into();
@@ -1167,8 +1167,8 @@ pub async fn save_access_key_to_keychain(
                 color_eyre::Report::msg(format!("Failed to write to file: {:?}", err))
             })?;
         println!(
-            "The data for the access key is saved in a file {}",
-            &path_with_account_name.display()
+            "The data for the access key is saved in a file {:?}",
+            &path_with_account_name
         );
     };
     Ok(())
@@ -1199,8 +1199,8 @@ pub fn write_config_toml(config: crate::config::Config) -> CliResult {
         .write(config_toml.as_bytes())
         .map_err(|err| color_eyre::Report::msg(format!("Failed to write to file: {:?}", err)))?;
     println!(
-        "The data for the access key is saved in a file {}",
-        &path_config_toml.display()
+        "Configuration data is stored in a file {:?}",
+        &path_config_toml
     );
     Ok(())
 }
