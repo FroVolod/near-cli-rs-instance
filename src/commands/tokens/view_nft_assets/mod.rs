@@ -22,21 +22,26 @@ impl ViewNftAssets {
         })
         .to_string()
         .into_bytes();
-        let query_view_method_response = near_jsonrpc_client::JsonRpcClient::connect(
-            self.network.get_network_config(config).rpc_url,
-        )
-        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-            block_reference: self.network.get_block_ref(),
-            request: near_primitives::views::QueryRequest::CallFunction {
-                account_id: self.nft_contract_account_id.clone().into(),
-                method_name,
-                args: near_primitives::types::FunctionArgs::from(args),
-            },
-        })
-        .await
-        .map_err(|err| {
-            color_eyre::Report::msg(format!("Failed to fetch query for view method: {:?}", err))
-        })?;
+        let mut json_rpc_client = near_jsonrpc_client::JsonRpcClient::connect(
+            self.network.get_network_config(config.clone()).rpc_url,
+        );
+        if let Some(api_key) = self.network.get_network_config(config.clone()).api_key {
+            json_rpc_client =
+                json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
+        };
+        let query_view_method_response = json_rpc_client
+            .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
+                block_reference: self.network.get_block_ref(),
+                request: near_primitives::views::QueryRequest::CallFunction {
+                    account_id: self.nft_contract_account_id.clone().into(),
+                    method_name,
+                    args: near_primitives::types::FunctionArgs::from(args),
+                },
+            })
+            .await
+            .map_err(|err| {
+                color_eyre::Report::msg(format!("Failed to fetch query for view method: {:?}", err))
+            })?;
         let call_result =
             if let near_jsonrpc_primitives::types::query::QueryResponseKind::CallResult(result) =
                 query_view_method_response.kind

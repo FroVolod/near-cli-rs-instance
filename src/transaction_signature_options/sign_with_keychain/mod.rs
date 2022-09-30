@@ -58,21 +58,26 @@ impl SignKeychain {
             if path.exists() {
                 path
             } else {
-                let query_view_method_response =
-                    near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone())
-                        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-                            block_reference: near_primitives::types::Finality::Final.into(),
-                            request: near_primitives::views::QueryRequest::ViewAccessKeyList {
-                                account_id: prepopulated_unsigned_transaction.signer_id.clone(),
-                            },
-                        })
-                        .await
-                        .map_err(|err| {
-                            color_eyre::Report::msg(format!(
-                                "Failed to fetch query for view key list: {:?}",
-                                err
-                            ))
-                        })?;
+                let mut json_rpc_client =
+                    near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone());
+                if let Some(api_key) = network_config.api_key.clone() {
+                    json_rpc_client =
+                        json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
+                };
+                let query_view_method_response = json_rpc_client
+                    .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
+                        block_reference: near_primitives::types::Finality::Final.into(),
+                        request: near_primitives::views::QueryRequest::ViewAccessKeyList {
+                            account_id: prepopulated_unsigned_transaction.signer_id.clone(),
+                        },
+                    })
+                    .await
+                    .map_err(|err| {
+                        color_eyre::Report::msg(format!(
+                            "Failed to fetch query for view key list: {:?}",
+                            err
+                        ))
+                    })?;
                 let access_key_view =
                     if let near_jsonrpc_primitives::types::query::QueryResponseKind::AccessKeyList(
                         result,

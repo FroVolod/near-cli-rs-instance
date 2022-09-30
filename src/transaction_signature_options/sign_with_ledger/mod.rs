@@ -81,25 +81,30 @@ impl SignLedger {
         network_config: crate::config::NetworkConfig,
     ) -> crate::CliResult {
         let seed_phrase_hd_path = self.seed_phrase_hd_path.clone().into();
-        let online_signer_access_key_response =
-            near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone())
-                .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-                    block_reference: near_primitives::types::Finality::Final.into(),
-                    request: near_primitives::views::QueryRequest::ViewAccessKey {
-                        account_id: prepopulated_unsigned_transaction.signer_id.clone(),
-                        public_key: self.signer_public_key.clone().into(),
-                    },
-                })
-                .await
-                .map_err(|err| {
-                    println!("\nUnsigned transaction:\n");
-                    crate::common::print_transaction(prepopulated_unsigned_transaction.clone());
-                    println!("\nYour transaction was not successfully signed.\n");
-                    color_eyre::Report::msg(format!(
-                        "Failed to fetch public key information for nonce: {:?}",
-                        err
-                    ))
-                })?;
+        let mut json_rpc_client =
+            near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone());
+        if let Some(api_key) = network_config.api_key.clone() {
+            json_rpc_client =
+                json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
+        };
+        let online_signer_access_key_response = json_rpc_client
+            .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
+                block_reference: near_primitives::types::Finality::Final.into(),
+                request: near_primitives::views::QueryRequest::ViewAccessKey {
+                    account_id: prepopulated_unsigned_transaction.signer_id.clone(),
+                    public_key: self.signer_public_key.clone().into(),
+                },
+            })
+            .await
+            .map_err(|err| {
+                println!("\nUnsigned transaction:\n");
+                crate::common::print_transaction(prepopulated_unsigned_transaction.clone());
+                println!("\nYour transaction was not successfully signed.\n");
+                color_eyre::Report::msg(format!(
+                    "Failed to fetch public key information for nonce: {:?}",
+                    err
+                ))
+            })?;
         let current_nonce =
             if let near_jsonrpc_primitives::types::query::QueryResponseKind::AccessKey(
                 online_signer_access_key,

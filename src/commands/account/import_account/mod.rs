@@ -75,7 +75,12 @@ async fn verify_account_id(
     public_key: near_crypto::PublicKey,
     network_config: crate::config::NetworkConfig,
 ) -> crate::CliResult {
-    near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url)
+    let mut json_rpc_client =
+        near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone());
+    if let Some(api_key) = network_config.api_key {
+        json_rpc_client = json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
+    };
+    json_rpc_client
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: near_primitives::types::Finality::Final.into(),
             request: near_primitives::views::QueryRequest::ViewAccessKey {

@@ -14,7 +14,14 @@ pub struct TransactionInfo {
 
 impl TransactionInfo {
     pub async fn process(&self, config: crate::config::Config) -> crate::CliResult {
-        let query_view_transaction_status = near_jsonrpc_client::JsonRpcClient::connect(self.network.get_network_config(config).rpc_url)
+        let mut json_rpc_client = near_jsonrpc_client::JsonRpcClient::connect(
+            self.network.get_network_config(config.clone()).rpc_url,
+        );
+        if let Some(api_key) = self.network.get_network_config(config.clone()).api_key {
+            json_rpc_client =
+                json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
+        };
+        let query_view_transaction_status = json_rpc_client
             .call(near_jsonrpc_client::methods::EXPERIMENTAL_tx_status::RpcTransactionStatusRequest {
                 transaction_info: near_jsonrpc_client::methods::EXPERIMENTAL_tx_status::TransactionInfo::TransactionId {
                     hash: near_primitives::hash::CryptoHash::from_str(&self.transaction_hash).unwrap(),
