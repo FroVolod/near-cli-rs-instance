@@ -9,7 +9,7 @@ pub struct AddNetworkConnection {
     ///What is the connection name? (e.g. pagoda-mainnet)
     connection_name: String,
     ///What is the RPC endpoint?
-    rpc_url: crate::common::AvailableRpcServerUrl,
+    rpc_url: crate::types::url::Url,
     ///What is the wallet endpoint?
     wallet_url: crate::types::url::Url,
     ///What is the transaction explorer endpoint?
@@ -103,11 +103,10 @@ impl AddNetworkConnection {
 
     pub async fn process(&self, mut config: crate::config::Config) -> crate::CliResult {
         config.networks.insert(
-            self.network_name.clone(),
+            self.connection_name.clone(),
             crate::config::NetworkConfig {
                 network_name: self.network_name.clone(),
-                connection_name: self.connection_name.clone(),
-                rpc_url: self.rpc_url.inner.clone(),
+                rpc_url: self.rpc_url.0.clone(),
                 wallet_url: self.wallet_url.0.clone(),
                 explorer_transaction_url: self.explorer_transaction_url.0.clone(),
                 api_key: self.api_key.clone(),
