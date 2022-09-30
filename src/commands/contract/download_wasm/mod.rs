@@ -51,14 +51,10 @@ impl DownloadContract {
         config: crate::config::Config,
         account_id: near_primitives::types::AccountId,
     ) -> crate::CliResult {
-        let mut json_rpc_client = near_jsonrpc_client::JsonRpcClient::connect(
-            self.network.get_network_config(config.clone()).rpc_url,
-        );
-        if let Some(api_key) = self.network.get_network_config(config.clone()).api_key {
-            json_rpc_client =
-                json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
-        };
-        let query_view_method_response = json_rpc_client
+        let query_view_method_response = self
+            .network
+            .get_network_config(config)
+            .json_rpc_client()?
             .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
                 block_reference: self.network.get_block_ref(),
                 request: near_primitives::views::QueryRequest::ViewCode {

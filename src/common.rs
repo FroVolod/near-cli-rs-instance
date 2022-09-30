@@ -155,38 +155,6 @@ impl std::fmt::Display for BlockHashAsBase58 {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct AvailableRpcServerUrl {
-    pub inner: url::Url,
-}
-
-impl std::str::FromStr for AvailableRpcServerUrl {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let url: url::Url =
-            url::Url::parse(s).map_err(|err| format!("URL is not parsed: {}", err))?;
-        tokio::runtime::Runtime::new()
-            .unwrap()
-            .block_on(async {
-                near_jsonrpc_client::JsonRpcClient::connect(url.clone())
-                    .call(near_jsonrpc_client::methods::status::RpcStatusRequest)
-                    .await
-            })
-            .map_err(|err| format!("AvailableRpcServerUrl: {:?}", err))?;
-        Ok(Self { inner: url })
-    }
-}
-
-impl std::fmt::Display for AvailableRpcServerUrl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.inner.fmt(f)
-    }
-}
-
-impl interactive_clap::ToCli for AvailableRpcServerUrl {
-    type CliVariant = AvailableRpcServerUrl;
-}
-
 const ONE_NEAR: u128 = 10u128.pow(24);
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
@@ -463,12 +431,8 @@ pub async fn get_account_transfer_allowance(
             pessimistic_transaction_fee: NearBalance::from_yoctonear(0),
         });
     };
-    let mut json_rpc_client =
-        near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone());
-    if let Some(api_key) = network_config.api_key {
-        json_rpc_client = json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
-    };
-    let storage_amount_per_byte = json_rpc_client
+    let storage_amount_per_byte = network_config
+        .json_rpc_client()?
         .call(
             near_jsonrpc_client::methods::EXPERIMENTAL_protocol_config::RpcProtocolConfigRequest {
                 block_reference: near_primitives::types::BlockReference::Finality(
@@ -500,13 +464,11 @@ pub async fn get_account_state(
     account_id: near_primitives::types::AccountId,
     block_reference: BlockReference,
 ) -> color_eyre::eyre::Result<Option<near_primitives::views::AccountView>> {
-    let server_addr = match block_reference {
-        BlockReference::Finality(_) | BlockReference::BlockId(_) => network_config.rpc_url,
+    let json_rpc_client = match block_reference {
+        BlockReference::Finality(_) | BlockReference::BlockId(_) => {
+            network_config.json_rpc_client()?
+        }
         BlockReference::SyncCheckpoint(_) => todo!(),
-    };
-    let mut json_rpc_client = near_jsonrpc_client::JsonRpcClient::connect(server_addr);
-    if let Some(api_key) = network_config.api_key {
-        json_rpc_client = json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
     };
     let query_view_method_response = json_rpc_client
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
@@ -1283,12 +1245,13 @@ pub async fn display_account_info(
     network_config: crate::config::NetworkConfig,
     block_ref: BlockReference,
 ) -> crate::CliResult {
-    let mut json_rpc_client =
-        near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone());
-    if let Some(api_key) = network_config.api_key {
-        json_rpc_client = json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
-    };
-    let resp = json_rpc_client
+    // let mut json_rpc_client =
+    //     near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone());
+    // if let Some(api_key) = network_config.api_key {
+    //     json_rpc_client = json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
+    // };
+    let resp = network_config
+        .json_rpc_client()?
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: block_ref,
             request: QueryRequest::ViewAccount {
@@ -1334,12 +1297,8 @@ pub async fn display_access_key_list(
     network_config: crate::config::NetworkConfig,
     block_ref: BlockReference,
 ) -> crate::CliResult {
-    let mut json_rpc_client =
-        near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone());
-    if let Some(api_key) = network_config.api_key {
-        json_rpc_client = json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
-    };
-    let resp = json_rpc_client
+    let resp = network_config
+        .json_rpc_client()?
         .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
             block_reference: block_ref,
             request: QueryRequest::ViewAccessKeyList { account_id },

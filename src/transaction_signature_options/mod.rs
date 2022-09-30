@@ -111,14 +111,8 @@ impl Submit {
         match self {
             Submit::Send => {
                 println!("Transaction sent ...");
-                let mut json_rpc_client =
-                    near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone());
-                if let Some(api_key) = network_config.api_key.clone() {
-                    json_rpc_client =
-                        json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
-                };
                 let transaction_info = loop {
-                    let transaction_info_result = json_rpc_client
+                    let transaction_info_result = network_config.json_rpc_client()?
                         .call(near_jsonrpc_client::methods::broadcast_tx_commit::RpcBroadcastTxCommitRequest{signed_transaction: signed_transaction.clone()})
                         .await;
                     match transaction_info_result {

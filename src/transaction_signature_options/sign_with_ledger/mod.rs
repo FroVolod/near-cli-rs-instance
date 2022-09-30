@@ -81,13 +81,8 @@ impl SignLedger {
         network_config: crate::config::NetworkConfig,
     ) -> crate::CliResult {
         let seed_phrase_hd_path = self.seed_phrase_hd_path.clone().into();
-        let mut json_rpc_client =
-            near_jsonrpc_client::JsonRpcClient::connect(network_config.rpc_url.clone());
-        if let Some(api_key) = network_config.api_key.clone() {
-            json_rpc_client =
-                json_rpc_client.header(near_jsonrpc_client::auth::ApiKey::new(api_key)?)
-        };
-        let online_signer_access_key_response = json_rpc_client
+        let online_signer_access_key_response = network_config
+            .json_rpc_client()?
             .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
                 block_reference: near_primitives::types::Finality::Final.into(),
                 request: near_primitives::views::QueryRequest::ViewAccessKey {
